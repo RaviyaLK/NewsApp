@@ -88,7 +88,7 @@ class NewsPage extends ConsumerWidget {
         child: ListView.builder(
         shrinkWrap: true,
         
-        itemCount:4,
+        itemCount:1,
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: (){
@@ -99,7 +99,7 @@ class NewsPage extends ConsumerWidget {
               
               title:"title",
               description:"title",
-              image: "title",
+              image:"",
               date: "title",
             ),
           );
