@@ -9,7 +9,7 @@ class News{
   String webURL;
 
   News({
-    required this.date,
+   required this.date,
     required this.title,
     required this.urltoImage,
     required this.description,
