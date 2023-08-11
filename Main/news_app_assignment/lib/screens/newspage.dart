@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../colors.dart';
+import '../widgets/colors.dart';
+import '../widgets/news_card.dart';
 
 String searchQuery = '';
 
@@ -82,6 +83,28 @@ class NewsPage extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+      body: SingleChildScrollView(
+        child: ListView.builder(
+        shrinkWrap: true,
+        
+        itemCount:4,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: (){
+              // Navigator.push(context,
+              //         MaterialPageRoute(builder: (context) => InfoPage()));
+            },
+            child: NewsCard(
+              
+              title:"title",
+              description:"title",
+              image: "title",
+              date: "title",
+            ),
+          );
+        },
+      ), 
       ),
     );
   }
