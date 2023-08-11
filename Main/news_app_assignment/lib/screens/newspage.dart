@@ -1,10 +1,41 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../api/news_service.dart';
+import '../model/news_model.dart';
 import '../widgets/colors.dart';
 import '../widgets/news_card.dart';
 
 String searchQuery = '';
+final newsRepositoryProvider= Provider((ref) => NewsService());
+final asyncNewsProvider = AsyncNotifierProvider<AsyncNewsNotifier,List<News>> (()=> AsyncNewsNotifier());
+final selectedNews = StateProvider((ref) => News(
+  date: '',
+  title: '',
+  webURL: '',
+  description: '',
+  content: '', 
+  author: '',
+  urltoImage:'', 
+));
+class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
+  @override
+  FutureOr<List<News>> build() {
+    return getNews(searchQuery);
+  }
+  Future <List<News>> getNews(searchQuery) async{
+    state= const AsyncLoading();
+    List<News> list=[];
+    state=await AsyncValue.guard(() async {
+      list= await ref.read(newsRepositoryProvider).getNews(searchQuery);
+      return list;
+    });
+    return list;
+  }
+  }
+
 
 final searchBarFocusedProvider = StateProvider<bool>((ref) => false);
 final FocusNode _searchFocusNode = FocusNode();
