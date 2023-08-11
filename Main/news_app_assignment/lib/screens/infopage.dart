@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
-
 import '../widgets/colors.dart';
 
 class InfoPage extends StatelessWidget {
-  const InfoPage({super.key, required this.title, required this.description, required this.image, required this.date,required this.content, required this.webURL, required this.author});
- final String  image;
+  const InfoPage({
+    super.key,
+    required this.title,
+    required this.description,
+    required this.image,
+    required this.date,
+    required this.content,
+    required this.webURL,
+    required this.author,
+  });
+
+  final String image;
   final String content;
   final String description;
   final String title;
   final String date;
   final String author;
   final String webURL;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,7 +28,6 @@ class InfoPage extends StatelessWidget {
         elevation: 0,
         shadowColor: Colors.grey,
         backgroundColor: hexStringToColor("#1858d2"),
-        // title: const Text("Info"),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -55,7 +64,7 @@ class InfoPage extends StatelessWidget {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                 FittedBox(
+                FittedBox(
                   child: Text(
                     author,
                     style: const TextStyle(
@@ -64,7 +73,7 @@ class InfoPage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: MediaQuery.of(context).size.width * 0.5),
-                 FittedBox(
+                FittedBox(
                   child: Text(
                     date,
                     style: const TextStyle(
@@ -78,22 +87,25 @@ class InfoPage extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                 Padding(
-                  padding: const  EdgeInsets.fromLTRB(20, 5, 20, 5),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
                   child: Text(
-                    "lorem ipsum dolor sit amet",
+                    title,
                     style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                   child: Text(
-                    "lorem ipsum dolor sit amet ",
+                    content,
                     maxLines: 9,
-                    style: TextStyle(fontWeight: FontWeight.w300, fontSize: 20,),
-                  ),     
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 20,
+                    ),
+                  ),
                 ),
-                Center(                
+                Center(
                   child: Container(
                     width: 300,
                     height: 50,
@@ -103,13 +115,13 @@ class InfoPage extends StatelessWidget {
                       onPressed: () {},
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.resolveWith((states) {
-                          if(states.contains(MaterialState.pressed)) {
+                          if (states.contains(MaterialState.pressed)) {
                             return Colors.blue;
                           }
                           return hexStringToColor("#1858d2");
                         }),
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         ),
                       ),
                       child: const Text(
@@ -122,9 +134,9 @@ class InfoPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),                
+                ),
               ],
-            )
+            ),
           ],
         ),
       ),
