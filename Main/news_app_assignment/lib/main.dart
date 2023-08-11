@@ -1,25 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:news_app_assignment/screens/newspage.dart';
+
+
+
 void main() {
-  runApp( MaterialApp(
-    title: 'Flutter Demo',
-    theme: ThemeData(primarySwatch: Colors.blue),
-    home:const HomePage(),
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    ProviderScope(
+    child: DevicePreview(
+        builder: (context) => const MainApp(), // Wrap your app
+      ),
   ),);
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-       appBar: AppBar(
-         title: const Text('Home Page'),
-          ),
-
-       body: Center(
-        child: Text('Hello World!'),
-       ),
-     );
+    return MaterialApp(
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
+      debugShowCheckedModeBanner: false,
+      home:NewsPage(),
+    );
   }
 }
