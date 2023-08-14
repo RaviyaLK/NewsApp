@@ -10,6 +10,7 @@ import 'infopage.dart';
 String searchQuery = '';
 TextEditingController searchController = TextEditingController();
 
+
 final newsRepositoryProvider= Provider((ref) => NewsService());
 final asyncNewsProvider = AsyncNotifierProvider<AsyncNewsNotifier,List<News>> (()=> AsyncNewsNotifier());
 final selectedNews = StateProvider((ref) => News(
@@ -136,6 +137,7 @@ class NewsPage extends ConsumerWidget {
          
         scrollDirection: Axis.vertical,
         child: Consumer(
+          
 
       
           builder: (context, ref, child) {
@@ -184,7 +186,7 @@ class NewsPage extends ConsumerWidget {
                     child: Center(child:Image(
                       height: screenHeight*0.7,
                       
-                      image: const NetworkImage("https://img.freepik.com/free-vector/oops-404-error-with-broken-robot-concept-illustration_114360-1920.jpg?w=740&t=st=1691997309~exp=1691997909~hmac=c92c2955131bfc8a2de4d510ca007386128b20d195063f7f74c9d1214022e160",)) ),
+                      image: const NetworkImage("https://i.ibb.co/W2pmkqD/Error-removebg-preview.png",)) ),
                   ),
                     
                 ],);

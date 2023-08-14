@@ -74,7 +74,7 @@ class InfoPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: MediaQuery.of(context).size.width * 0.3),
+                SizedBox(width: MediaQuery.of(context).size.width * 0.4),
                 FittedBox(
                   child: Text(
                     date,
@@ -93,7 +93,7 @@ class InfoPage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
                   child: Text(
                     title,
-                    style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Padding(
@@ -103,7 +103,8 @@ class InfoPage extends StatelessWidget {
                     maxLines: 9,
                     style: const TextStyle(
                       fontWeight: FontWeight.w300,
-                      fontSize: 20,
+                      color: Colors.blueGrey,
+                      fontSize: 16,
                     ),
                   ),
                 ),
