@@ -1,14 +1,12 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'dart:async';
 import '../api/news_service.dart';
 import '../model/news_model.dart';
 import '../widgets/colors.dart';
 import '../widgets/news_card.dart';
-
-String searchQuery = '';
+import 'infopage.dart';
+String searchQuery = 'sri lanka cricket';
 final newsRepositoryProvider= Provider((ref) => NewsService());
 final asyncNewsProvider = AsyncNotifierProvider<AsyncNewsNotifier,List<News>> (()=> AsyncNewsNotifier());
 final selectedNews = StateProvider((ref) => News(
@@ -16,8 +14,7 @@ final selectedNews = StateProvider((ref) => News(
   title: '',
   webURL: '',
   description: '',
-  content: '', 
-  author: '',
+  content: '', author: '',
   urltoImage:'', 
 ));
 class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
@@ -35,6 +32,8 @@ class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
     return list;
   }
   }
+
+
 
 
 final searchBarFocusedProvider = StateProvider<bool>((ref) => false);
@@ -84,6 +83,7 @@ class NewsPage extends ConsumerWidget {
                               ref.read(searchBarFocusedProvider.notifier).state = true;
                             },
                             onChanged: (value) {
+                              searchQuery = value;
                               // Handle onChanged
                             },
                             decoration: const InputDecoration.collapsed(
@@ -116,27 +116,47 @@ class NewsPage extends ConsumerWidget {
         ),
       ),
       body: SingleChildScrollView(
-        child: ListView.builder(
-        shrinkWrap: true,
+        scrollDirection: Axis.vertical,
+        child: Consumer(
+          builder: (context, ref, child) {
+            final newsList = ref.watch (asyncNewsProvider);
+            return newsList.when(data: (news){
+              return ListView.separated(
+                separatorBuilder:(context, index) => const SizedBox(
+                   height: 10,
+                   ) ,
+                shrinkWrap: true,
+
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return  NewsCard(
+                      title: news[index].title,
+                      description: news[index].description,
+                      image: news[index].urltoImage,
+                      date: news[index].date,
+                      onpress: (){
+                        Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => InfoPage(
+                        date: news[index].date,
+                        title: news[index].title,
+                        webURL: news[index].webURL,
+                        description: news[index].description,
+                        content: news[index].content,
+                        author: news[index].author,
+                        image: news[index].urltoImage,)));
+                        
+                      },
+                    );
+                  
+                },
+              );
+            }, error: (e,_){
+              return Column(children: [Text(_.toString())],);
+
+            }, loading: ()=> const Center(child: CircularProgressIndicator(color: Colors.blue, )),);
+          },
         
-        itemCount:4,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: (){
-              // Navigator.push(context,
-              //         MaterialPageRoute(builder: (context) => InfoPage()));
-            },
-            child: NewsCard(
-              onpress: (){},
-              
-              title:"title",
-              description:"title",
-              image: "title",
-              date: "title",
-            ),
-          );
-        },
-      ), 
+        ), 
       ),
     );
   }

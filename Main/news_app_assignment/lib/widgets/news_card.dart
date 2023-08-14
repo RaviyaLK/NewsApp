@@ -30,12 +30,12 @@ class NewsCard extends StatelessWidget {
             Expanded(
               flex: 2,
               child: Container(
-                height: 180,
+                height: 160,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 20, 0, 20),
+                  padding: const EdgeInsets.fromLTRB(15, 20, 15, 20),
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),

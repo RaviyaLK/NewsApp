@@ -12,6 +12,7 @@ dependencies:
   device_preview: ^1.1.0
   http: ^1.1.0
   flutter_riverpod: ^2.3.6
+  url_launcher: ^6.1.12
   
 
 dev_dependencies:
