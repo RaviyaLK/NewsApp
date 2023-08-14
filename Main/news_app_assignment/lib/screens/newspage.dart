@@ -6,7 +6,7 @@ import '../model/news_model.dart';
 import '../widgets/colors.dart';
 import '../widgets/news_card.dart';
 import 'infopage.dart';
-String searchQuery = 'sri lanka cricket';
+String searchQuery = 'Oppenheimer';
 final newsRepositoryProvider= Provider((ref) => NewsService());
 final asyncNewsProvider = AsyncNotifierProvider<AsyncNewsNotifier,List<News>> (()=> AsyncNewsNotifier());
 final selectedNews = StateProvider((ref) => News(
@@ -118,6 +118,7 @@ class NewsPage extends ConsumerWidget {
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Consumer(
+      
           builder: (context, ref, child) {
             final newsList = ref.watch (asyncNewsProvider);
             return newsList.when(data: (news){
@@ -126,8 +127,9 @@ class NewsPage extends ConsumerWidget {
                    height: 10,
                    ) ,
                 shrinkWrap: true,
+                controller: ScrollController(keepScrollOffset: false),
 
-                itemCount: 10,
+                itemCount: news.length < 10 ? news.length : 10,
                 itemBuilder: (context, index) {
                   return  NewsCard(
                       title: news[index].title,

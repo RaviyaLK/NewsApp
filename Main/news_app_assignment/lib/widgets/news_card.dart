@@ -40,6 +40,7 @@ class NewsCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       image: DecorationImage(
+                        onError: (exception, stackTrace) => const Icon(Icons.error),
                         scale: 1.5,
                         image: NetworkImage(image),
                         alignment: Alignment.center,
@@ -69,7 +70,7 @@ class NewsCard extends StatelessWidget {
                     const SizedBox(height: 8.0),
                     const SizedBox(height: 40.0),
                     Padding(
-                      padding: const EdgeInsets.only(left: 120),
+                      padding: const EdgeInsets.only(left: 60),
                       child: Text(date),
                     ),
                   ],
