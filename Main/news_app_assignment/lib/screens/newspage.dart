@@ -6,7 +6,7 @@ import '../model/news_model.dart';
 import '../widgets/colors.dart';
 import '../widgets/news_card.dart';
 import 'infopage.dart';
-String searchQuery = 'Oppenheimer';
+String searchQuery = '';
 final newsRepositoryProvider= Provider((ref) => NewsService());
 final asyncNewsProvider = AsyncNotifierProvider<AsyncNewsNotifier,List<News>> (()=> AsyncNewsNotifier());
 final selectedNews = StateProvider((ref) => News(
@@ -14,7 +14,8 @@ final selectedNews = StateProvider((ref) => News(
   title: '',
   webURL: '',
   description: '',
-  content: '', author: '',
+  content: '', 
+  author: '',
   urltoImage:'', 
 ));
 class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
@@ -31,6 +32,7 @@ class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
     });
     return list;
   }
+
   }
 
 
@@ -61,8 +63,8 @@ class NewsPage extends ConsumerWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
+                   child:Container(
+                 
                     width: isSearchBarFocused ? screenWidth * 0.65 : screenWidth * 0.8,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
@@ -83,7 +85,7 @@ class NewsPage extends ConsumerWidget {
                               ref.read(searchBarFocusedProvider.notifier).state = true;
                             },
                             onChanged: (value) {
-                              searchQuery = value;
+                             ref.read(asyncNewsProvider.notifier).getNews(value);
                               // Handle onChanged
                             },
                             decoration: const InputDecoration.collapsed(
@@ -155,7 +157,10 @@ class NewsPage extends ConsumerWidget {
             }, error: (e,_){
               return Column(children: [Text(_.toString())],);
 
-            }, loading: ()=> const Center(child: CircularProgressIndicator(color: Colors.blue, )),);
+            }, loading: ()=> const Padding(
+              padding: EdgeInsets.all(100.0),
+              child: Center(child: CircularProgressIndicator(color: Colors.blue, )),
+            ),);
           },
         
         ), 
