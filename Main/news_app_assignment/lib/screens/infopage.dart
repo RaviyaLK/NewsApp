@@ -25,6 +25,7 @@ class InfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: hexStringToColor("#ffffff"),
       appBar: AppBar(
         elevation: 0,
         shadowColor: Colors.grey,
@@ -73,7 +74,7 @@ class InfoPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: MediaQuery.of(context).size.width * 0.2),
+                SizedBox(width: MediaQuery.of(context).size.width * 0.3),
                 FittedBox(
                   child: Text(
                     date,
