@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/colors.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class InfoPage extends StatelessWidget {
   const InfoPage({
@@ -72,7 +73,7 @@ class InfoPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: MediaQuery.of(context).size.width * 0.5),
+                SizedBox(width: MediaQuery.of(context).size.width * 0.2),
                 FittedBox(
                   child: Text(
                     date,
@@ -112,7 +113,11 @@ class InfoPage extends StatelessWidget {
                     margin: const EdgeInsets.fromLTRB(0, 10, 0, 20),
                     decoration: BoxDecoration(borderRadius: BorderRadius.circular(90)),
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+
+
+                        _launchUrl(Uri.parse(webURL));
+                      },
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.resolveWith((states) {
                           if (states.contains(MaterialState.pressed)) {
@@ -141,5 +146,10 @@ class InfoPage extends StatelessWidget {
         ),
       ),
     );
+    
   }
+  Future<void> _launchUrl(Uri _url) async {
+  if (!await launchUrl(_url)) {
+    throw Exception('Could not launch $_url');
+  }}
 }
