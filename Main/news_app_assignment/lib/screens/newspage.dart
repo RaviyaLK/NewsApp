@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import '../api/news_service.dart';
 import '../model/news_model.dart';
@@ -10,10 +11,10 @@ import 'infopage.dart';
 
 String searchQuery = '';
 TextEditingController searchController = TextEditingController();
+List<String> searchHistory = [];
 
 final newsRepositoryProvider = Provider((ref) => NewsService());
-final asyncNewsProvider =
-    AsyncNotifierProvider<AsyncNewsNotifier, List<News>>(
+final asyncNewsProvider =AsyncNotifierProvider<AsyncNewsNotifier, List<News>>(
         () => AsyncNewsNotifier());
 final selectedNews = StateProvider((ref) => News(
       date: '',
@@ -52,7 +53,7 @@ class NewsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Debouncer _debouncer = Debouncer();
+    Debouncer debouncer = Debouncer();
     final isSearchBarFocused = ref.watch(searchBarFocusedProvider);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -88,6 +89,8 @@ class NewsPage extends ConsumerWidget {
                         ),
                         Expanded(
                           child: TextField(
+                            autocorrect: true,
+                            
                             controller: searchController,
                             focusNode: _searchFocusNode,
                             onTap: () {
@@ -96,7 +99,7 @@ class NewsPage extends ConsumerWidget {
                             },
                             onChanged: (value) {
                               if (value.isNotEmpty){
-                                _debouncer.run(() {
+                                debouncer.run(() {
                                   ref.read(asyncNewsProvider.notifier).getNews(value);
                                 }
                                 );
@@ -109,6 +112,25 @@ class NewsPage extends ConsumerWidget {
                               // } else {
                               //   ref.read(asyncNewsProvider.notifier).getNews('');
                               // }
+                            },
+                            onEditingComplete: () async {
+                              final SharedPreferences prefs = await SharedPreferences.getInstance();
+                              
+                              if(searchHistory.length > 3 && searchController.text.isNotEmpty && !searchHistory.contains(searchController.text)&& searchController.text !=''){
+                                searchHistory.removeAt(0);
+                                searchHistory.add(searchController.text);
+                                await prefs.setStringList('searchHistory', searchHistory);
+                              }else if(searchController.text.isNotEmpty&& !searchHistory.contains(searchController.text)&& searchController.text !=''){
+                                searchHistory.add(searchController.text);
+                                await prefs.setStringList('searchHistory', searchHistory);
+                              }
+
+
+                              // print(searchHistory);
+
+                              final List<String>? searchHist = prefs.getStringList('searchHistory');
+                              print(searchHist);
+
                             },
                             decoration: const InputDecoration.collapsed(
                               hintStyle: TextStyle(color: Colors.grey),
@@ -176,7 +198,7 @@ class NewsPage extends ConsumerWidget {
                               news[index].title,
                               news[index].date.substring(0, 10),
                               news[index].author,
-                             news[index].webURL)
+                              news[index].webURL)
 
 
 
@@ -251,15 +273,15 @@ class NewsPage extends ConsumerWidget {
 class Debouncer {
   final int milliseconds;
 
-  Timer? _timer;
+  Timer? timer;
 
   Debouncer({this.milliseconds=1000});
 
   run(VoidCallback action) {
-    if (null != _timer) {
-      _timer!.cancel();
+    if (null != timer) {
+      timer!.cancel();
     }
-    _timer = Timer(Duration(milliseconds: milliseconds), action);
+    timer = Timer(Duration(milliseconds: milliseconds), action);
   }
   
 }

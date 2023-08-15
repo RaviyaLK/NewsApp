@@ -71,6 +71,7 @@ class InfoPage extends StatelessWidget {
                   FittedBox(
                     child: Text(
                       
+                      
                       author.trim(),
                       style: const TextStyle(
                         fontWeight: FontWeight.w500,

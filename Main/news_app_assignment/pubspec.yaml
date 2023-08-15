@@ -14,12 +14,18 @@ dependencies:
   flutter_riverpod: ^2.3.6
   url_launcher: ^6.1.12
   loading_animation_widget: ^1.2.0+4
+  shared_preferences: ^2.2.0
   
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.13.1
+flutter_launcher_icons:
+  image_path: "lib/assets/logo.png"
+  android: true
+  ios: true
 
 flutter:
   uses-material-design: true

@@ -24,7 +24,7 @@ class MainApp extends StatelessWidget {
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,
       debugShowCheckedModeBanner: false,
-      home:NewsPage(),
+      home:const NewsPage(),
     );
   }
 }
