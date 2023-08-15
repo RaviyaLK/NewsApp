@@ -6,9 +6,9 @@ import '../model/news_model.dart';
 class NewsService{
   Future <List<News> > getNews(String query) async{
     List <News> newsList = [];
-    String url = 'https://newsapi.org/v2/everything?q=$query&apiKey=8a17dee278024745bc5c0cbf31db9e0a';
+    String url = 'https://newsapi.org/v2/everything?q=$query&apiKey=682e3e6915184e3384c4df0f4e6f92d4';
     final response = await http.get(Uri.parse(url));
-    print(response.statusCode);
+    
    if (response.statusCode==200){
       final jsonResponse= jsonDecode(response.body);
 

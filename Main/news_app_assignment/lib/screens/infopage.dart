@@ -62,28 +62,32 @@ class InfoPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FittedBox(
-                  child: Text(
-                    author,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
+            Padding(
+              padding: const EdgeInsets.only(left:15,right: 15),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  FittedBox(
+                    child: Text(
+                      
+                      author.trim(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(width: MediaQuery.of(context).size.width * 0.4),
-                FittedBox(
-                  child: Text(
-                    date,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
+                  
+                  FittedBox(
+                    child: Text(
+                      date,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 30),
             Column(
@@ -116,8 +120,6 @@ class InfoPage extends StatelessWidget {
                     decoration: BoxDecoration(borderRadius: BorderRadius.circular(90)),
                     child: ElevatedButton(
                       onPressed: () {
-
-
                         _launchUrl(Uri.parse(webURL));
                       },
                       style: ButtonStyle(
@@ -148,10 +150,14 @@ class InfoPage extends StatelessWidget {
         ),
       ),
     );
-    
   }
+
   Future<void> _launchUrl(Uri url) async {
-  if (!await launchUrl(url)) {
-    throw Exception('Could not launch $url');
-  }}
+    if (!await launchUrl(url)) {
+      const SnackBar(
+        content:  Text('Could not launch url'),
+      );
+      throw Exception('Could not launch $url');
+    }
+  }
 }
