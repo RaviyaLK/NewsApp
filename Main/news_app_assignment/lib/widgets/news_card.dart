@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 
 class NewsCard extends StatelessWidget {
+  
   const NewsCard({
     Key? key,
     required this.title,
@@ -19,10 +20,12 @@ class NewsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenwidth = MediaQuery.of(context).size.width;
+    double screenHeight =MediaQuery.of(context).size.height;
     return GestureDetector(
       onTap: onpress,
       child: Card(
-        elevation: 2,
+        elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
@@ -43,7 +46,8 @@ class NewsCard extends StatelessWidget {
                       image: DecorationImage(
                         onError: (exception, stackTrace) => const Icon(Icons.error),
                         scale: 1,
-                        image: NetworkImage(image),
+                        image: NetworkImage(image,
+                        ),
                         alignment: Alignment.center,
                         fit: BoxFit.cover,
                       ),
@@ -55,7 +59,7 @@ class NewsCard extends StatelessWidget {
             Expanded(
               flex: 4,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(4, 18, 8, 8),
+                padding:  EdgeInsets.fromLTRB(screenwidth*0.01, screenHeight*0.02,screenwidth*0.02,screenHeight*0.01),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -68,7 +72,7 @@ class NewsCard extends StatelessWidget {
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 8.0),
+                    SizedBox(height:screenHeight*0.02),
                     Text(
                       description,
                       maxLines: 2,
@@ -78,10 +82,9 @@ class NewsCard extends StatelessWidget {
                         fontSize: 13,
                       ),
                     ),
-                    const SizedBox(height: 8.0),
-                    const SizedBox(height: 5.0),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 130),
+                    SizedBox(height: screenHeight*0.02),                   
+                    Padding(                      
+                      padding: EdgeInsets.only(left: screenwidth*0.3),
                       child: Text(
                         date,
                         style: const TextStyle(

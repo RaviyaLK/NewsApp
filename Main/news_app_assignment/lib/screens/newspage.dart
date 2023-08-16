@@ -46,7 +46,7 @@ class NewsPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: hexStringToColor("##f4f6f8"),
       appBar: AppBar(
-        elevation: 0,
+        elevation: 2,
         shadowColor: Colors.grey,
         backgroundColor: hexStringToColor("#1858d2"),
         centerTitle: true,
@@ -98,7 +98,7 @@ class NewsPage extends ConsumerWidget {
                             onEditingComplete: () async {
                               final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-                              if (searchHistory.length > 3 &&
+                              if (searchHistory.length > 5 &&
                                   searchController.text.isNotEmpty &&
                                   !searchHistory.contains(searchController.text) &&
                                   searchController.text != '') {
@@ -110,9 +110,7 @@ class NewsPage extends ConsumerWidget {
                                   searchController.text != '') {
                                 searchHistory.add(searchController.text);
                                 await prefs.setStringList('searchHistory', searchHistory);
-                              }
-
-                              // ...
+                              }                              
                             },
                             decoration: const InputDecoration.collapsed(
                               hintStyle: TextStyle(color: Colors.grey),
@@ -165,13 +163,14 @@ class NewsPage extends ConsumerWidget {
                     right: 14.0),
                   child:  Divider(
                     height: 1,
-                    thickness: 2,
+                    thickness: 1,
                     )),
                 shrinkWrap: true,
                 itemCount: searchHistory.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-
+                    hoverColor: Colors.grey[300],                      
+                    tileColor: Colors.white,
                     leading: const Icon(Icons.history),
                     selectedTileColor: Colors.grey[300],
                     horizontalTitleGap: 4,
@@ -227,15 +226,12 @@ class NewsPage extends ConsumerWidget {
                 error: (e, _) {
                   return Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text("Error: $e"),
-                      ),
+                     
                       Padding(
                         padding: const EdgeInsets.only(top: 0, bottom: 0),
                         child: Center(
                           child: Image(
-                            height: screenHeight * 0.7,
+                            height: screenHeight * 0.5,
                             width: screenWidth * 0.7,
                             image: const NetworkImage(
                               "https://cdn-icons-png.flaticon.com/512/755/755014.png",
@@ -243,7 +239,9 @@ class NewsPage extends ConsumerWidget {
                           ),
                         ),
                       ),
-                    ],
+                       Text("Error: $e",style: const TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
+                       
+                    ], 
                   );
                 },
                 loading: () => Padding(

@@ -53,6 +53,9 @@ class InfoPage extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.network(
+                    errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                      return const Icon(Icons.image_not_supported_outlined,size: 250,);
+                    },
                     image,
                     width: double.infinity,
                     height: 250,
