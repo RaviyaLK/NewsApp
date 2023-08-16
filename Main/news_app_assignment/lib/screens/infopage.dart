@@ -69,16 +69,13 @@ class InfoPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   FittedBox(
-                    child: Text(
-                      
-                      
+                    child: Text(                    
                       author.trim(),
                       style: const TextStyle(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                  
                   FittedBox(
                     child: Text(
                       date,

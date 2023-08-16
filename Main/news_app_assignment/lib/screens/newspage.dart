@@ -12,20 +12,11 @@ import 'infopage.dart';
 String searchQuery = '';
 TextEditingController searchController = TextEditingController();
 List<String> searchHistory = [];
-
 final newsRepositoryProvider = Provider((ref) => NewsService());
-final asyncNewsProvider =AsyncNotifierProvider<AsyncNewsNotifier, List<News>>(
-        () => AsyncNewsNotifier());
-final selectedNews = StateProvider((ref) => News(
-      date: '',
-      title: '',
-      webURL: '',
-      description: '',
-      content: '',
-      author: '',
-      urltoImage: '',
-    ));
-
+final asyncNewsProvider =AsyncNotifierProvider<AsyncNewsNotifier, List<News>>( () => AsyncNewsNotifier());
+final searchHistoryProvider = StateProvider((ref) => searchHistory);
+final searchBarFocusedProvider = StateProvider<bool>((ref) => false);
+final FocusNode _searchFocusNode = FocusNode();
 class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
   @override
   FutureOr<List<News>> build() {
@@ -42,12 +33,6 @@ class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
     return list;
   }
 }
-
-
-
-final searchBarFocusedProvider = StateProvider<bool>((ref) => false);
-final FocusNode _searchFocusNode = FocusNode();
-
 class NewsPage extends ConsumerWidget {
   const NewsPage({super.key});
 
@@ -67,8 +52,7 @@ class NewsPage extends ConsumerWidget {
         centerTitle: true,
         title: const Text('News Feed'),
         bottom: PreferredSize(
-          preferredSize:
-              Size.fromHeight(MediaQuery.of(context).size.height * 0.09),
+          preferredSize: Size.fromHeight(MediaQuery.of(context).size.height * 0.09),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 12, 12, 20),
             child: Row(
@@ -90,47 +74,43 @@ class NewsPage extends ConsumerWidget {
                         Expanded(
                           child: TextField(
                             autocorrect: true,
-                            
                             controller: searchController,
                             focusNode: _searchFocusNode,
-                            onTap: () {
+                            onTap: () async {
                               _searchFocusNode.requestFocus();
                               ref.read(searchBarFocusedProvider.notifier).state = true;
+                              final SharedPreferences prefs = await SharedPreferences.getInstance();
+                              final List<String> searchHist = prefs.getStringList('searchHistory') ?? [];
+                              searchHistory = searchHist;
+                              ref.read(searchHistoryProvider.notifier).state = searchHistory;
                             },
                             onChanged: (value) {
-                              if (value.isNotEmpty){
+                              if (value.isNotEmpty) {
                                 debouncer.run(() {
                                   ref.read(asyncNewsProvider.notifier).getNews(value);
-                                }
-                                );
-                                }else{
-                                    ref.read(asyncNewsProvider.notifier).getNews('Apple');
-
+                                });
+                              } else {
+                                ref.read(asyncNewsProvider.notifier).getNews('Apple');
                               }
-                              // if (searchController.text.isNotEmpty) {
-                              //   ref.read(asyncNewsProvider.notifier).getNews(value);
-                              // } else {
-                              //   ref.read(asyncNewsProvider.notifier).getNews('');
-                              // }
                             },
                             onEditingComplete: () async {
                               final SharedPreferences prefs = await SharedPreferences.getInstance();
-                              
-                              if(searchHistory.length > 3 && searchController.text.isNotEmpty && !searchHistory.contains(searchController.text)&& searchController.text !=''){
+
+                              if (searchHistory.length > 3 &&
+                                  searchController.text.isNotEmpty &&
+                                  !searchHistory.contains(searchController.text) &&
+                                  searchController.text != '') {
                                 searchHistory.removeAt(0);
                                 searchHistory.add(searchController.text);
                                 await prefs.setStringList('searchHistory', searchHistory);
-                              }else if(searchController.text.isNotEmpty&& !searchHistory.contains(searchController.text)&& searchController.text !=''){
+                              } else if (searchController.text.isNotEmpty &&
+                                  !searchHistory.contains(searchController.text) &&
+                                  searchController.text != '') {
                                 searchHistory.add(searchController.text);
                                 await prefs.setStringList('searchHistory', searchHistory);
                               }
 
-
-                              // print(searchHistory);
-
-                              final List<String>? searchHist = prefs.getStringList('searchHistory');
-                              print(searchHist);
-
+                              // ...
                             },
                             decoration: const InputDecoration.collapsed(
                               hintStyle: TextStyle(color: Colors.grey),
@@ -166,116 +146,108 @@ class NewsPage extends ConsumerWidget {
         child: Consumer(
           builder: (context, ref, child) {
             final newsList = ref.watch(asyncNewsProvider);
-            return newsList.when(
-              data: (news) {
-                return Padding(
-                  padding: const EdgeInsets.all(14.0),
-                  child: ListView.separated(
-                    separatorBuilder: (context, index) => const SizedBox(
-                      height: 20,
-                    ),
-                    shrinkWrap: true,
-                    controller: ScrollController(keepScrollOffset: false),
-                    itemCount: news.length < 10 
-                    ? news.length 
-                    : 10,
-                    itemBuilder: (context, index) {
-                      return AnimatedOpacity(
-                        duration: const Duration(milliseconds: 500),
-                        opacity: 1,
-                        child: NewsCard(
-                          title: news[index].title,
-                          description: news[index].description,
-                          image: news[index].urltoImage,
-                          date: news[index].date.substring(0, 10),
-                          onpress: () {
-                            
-                            Navigator.push(context,
-                            _createRoute(
-                              news[index].urltoImage,
-                              news[index].content,
-                              news[index].description,
-                              news[index].title,
-                              news[index].date.substring(0, 10),
-                              news[index].author,
-                              news[index].webURL)
-
-
-
-
-
-
-
-
-                              
-                              // context,
-                              // MaterialPageRoute(
-                              //   builder: (context) => InfoPage(
-                              //     date: news[index].date.substring(0, 10),
-                              //     title: news[index].title,
-                              //     webURL: news[index].webURL,
-                              //     description: news[index].description,
-                              //     content: news[index].content,
-                              //     author: news[index].author,
-                              //     image: news[index].urltoImage,
-                              //   ),
-                              // ),
-                            );
-                          },
-                        ),
-                      );
+            if (isSearchBarFocused && searchController.text.isEmpty) {
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: searchHistory.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    leading: const Icon(Icons.history),
+                    selectedTileColor: Colors.grey[300],
+                    horizontalTitleGap: 12,
+                    onTap: () {
+                      searchController.text = searchHistory[index];
+                      ref.read(asyncNewsProvider.notifier).getNews(searchHistory[index]);
+                      ref.read(searchBarFocusedProvider.notifier).state = false;
+                      _searchFocusNode.unfocus();
                     },
-                  ),
-                );
-              },
-              error: (e, _) {
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text("Error: $e"),
+                    title: Text(searchHistory[index], style: const TextStyle(fontWeight: FontWeight.bold)),
+                  );
+                },
+              );
+            } else {
+              return newsList.when(
+                data: (news) {
+                  return Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: ListView.separated(
+                      separatorBuilder: (context, index) => const SizedBox(height: 20),
+                      shrinkWrap: true,
+                      controller: ScrollController(keepScrollOffset: false),
+                      itemCount: news.length < 10 ? news.length : 10,
+                      itemBuilder: (context, index) {
+                        return AnimatedOpacity(
+                          duration: const Duration(milliseconds: 500),
+                          opacity: 1,
+                          child: NewsCard(
+                            title: news[index].title,
+                            description: news[index].description,
+                            image: news[index].urltoImage,
+                            date: news[index].date.substring(0, 10),
+                            onpress: () {
+                              Navigator.push(
+                                context,
+                                _createRoute(
+                                  news[index].urltoImage,
+                                  news[index].content,
+                                  news[index].description,
+                                  news[index].title,
+                                  news[index].date.substring(0, 10),
+                                  news[index].author,
+                                  news[index].webURL,
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 0, bottom: 0),
-                      child: Center(
-                        // child: Image.network("https://png.pngtree.com/element_pic/16/10/28/445367348af63e0be1aee16a1dd5bec8.jpg"),
-                        child: Image(
-                          height: screenHeight * 0.7,
-                          width: screenWidth * 0.7,
-                          image: const NetworkImage(
-                            "https://cdn-icons-png.flaticon.com/512/755/755014.png",
+                  );
+                },
+                error: (e, _) {
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Error: $e"),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 0, bottom: 0),
+                        child: Center(
+                          child: Image(
+                            height: screenHeight * 0.7,
+                            width: screenWidth * 0.7,
+                            image: const NetworkImage(
+                              "https://cdn-icons-png.flaticon.com/512/755/755014.png",
+                            ),
                           ),
                         ),
                       ),
+                    ],
+                  );
+                },
+                loading: () => Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
+                  child: Center(
+                    child: LoadingAnimationWidget.staggeredDotsWave(
+                      color: Colors.blue,
+                      size: 100,
                     ),
-                  ],
-                );
-              },
-              loading: () => Padding(
-                padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
-                child: Center(
-                  child: LoadingAnimationWidget.staggeredDotsWave(
-                    color: Colors.blue,
-                    size: 100,
                   ),
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            }
+          }),
       ),
-   
     );
-    
   }
-  
 }
+
 class Debouncer {
   final int milliseconds;
-
   Timer? timer;
 
-  Debouncer({this.milliseconds=1000});
+  Debouncer({this.milliseconds = 1000});
 
   run(VoidCallback action) {
     if (null != timer) {
@@ -283,19 +255,27 @@ class Debouncer {
     }
     timer = Timer(Duration(milliseconds: milliseconds), action);
   }
-  
 }
 
-Route _createRoute( 
-String image,
-String content,
-String description,
-String title,
-String date,
-String author,
-String webURL,) {
+Route _createRoute(
+  String image,
+  String content,
+  String description,
+  String title,
+  String date,
+  String author,
+  String webURL,
+) {
   return PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) => InfoPage(title: title,content: content,description: description,author: author,date: date,webURL: webURL,image: image),
+    pageBuilder: (context, animation, secondaryAnimation) => InfoPage(
+      title: title,
+      content: content,
+      description: description,
+      author: author,
+      date: date,
+      webURL: webURL,
+      image: image,
+    ),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       const begin = Offset(1.0, 0.0);
       const end = Offset.zero;
@@ -310,4 +290,3 @@ String webURL,) {
     },
   );
 }
-
