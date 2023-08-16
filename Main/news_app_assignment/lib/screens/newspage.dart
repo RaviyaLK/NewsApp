@@ -61,7 +61,7 @@ class NewsPage extends ConsumerWidget {
                   child: Container(
                     width: isSearchBarFocused ? screenWidth * 0.65 : screenWidth * 0.8,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(14),
                       color: Colors.grey[300],
                     ),
                     child: Row(
@@ -73,6 +73,8 @@ class NewsPage extends ConsumerWidget {
                         ),
                         Expanded(
                           child: TextField(
+                            textCapitalization: TextCapitalization.words,
+                            autofocus: false,
                             autocorrect: true,
                             controller: searchController,
                             focusNode: _searchFocusNode,
@@ -118,6 +120,15 @@ class NewsPage extends ConsumerWidget {
                             ),
                           ),
                         ),
+                        if (isSearchBarFocused)
+                        IconButton(
+                          icon:const Icon(Icons.close, color: Colors.grey,size: 20,),
+                          onPressed:(){ 
+                            searchController.clear();
+                          _searchFocusNode.unfocus();
+
+                          },
+                         ),
                       ],
                     ),
                   ),
@@ -147,14 +158,23 @@ class NewsPage extends ConsumerWidget {
           builder: (context, ref, child) {
             final newsList = ref.watch(asyncNewsProvider);
             if (isSearchBarFocused && searchController.text.isEmpty) {
-              return ListView.builder(
+              return ListView.separated(
+                separatorBuilder: (context, index) => const Padding(
+                  padding:  EdgeInsets.only(
+                    left: 14.0, 
+                    right: 14.0),
+                  child:  Divider(
+                    height: 1,
+                    thickness: 2,
+                    )),
                 shrinkWrap: true,
                 itemCount: searchHistory.length,
                 itemBuilder: (context, index) {
                   return ListTile(
+
                     leading: const Icon(Icons.history),
                     selectedTileColor: Colors.grey[300],
-                    horizontalTitleGap: 12,
+                    horizontalTitleGap: 4,
                     onTap: () {
                       searchController.text = searchHistory[index];
                       ref.read(asyncNewsProvider.notifier).getNews(searchHistory[index]);
