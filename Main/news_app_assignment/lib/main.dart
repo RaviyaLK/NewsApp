@@ -3,14 +3,12 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:news_app_assignment/screens/newspage.dart';
 
-
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     ProviderScope(
     child: DevicePreview(
-        builder: (context) => const MainApp(), // Wrap your app
+        builder: (context) => const MainApp(), 
       ),
   ),);
 }

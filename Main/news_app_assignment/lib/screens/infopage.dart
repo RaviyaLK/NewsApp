@@ -25,11 +25,11 @@ class InfoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: hexStringToColor("#ffffff"),
+      backgroundColor: hexStringToColor("#ffffff"),//Colors.white,
       appBar: AppBar(
         elevation: 0,
         shadowColor: Colors.grey,
-        backgroundColor: hexStringToColor("#1858d2"),
+        backgroundColor: hexStringToColor("#1858d2"),//Colors.blue[900],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -45,6 +45,7 @@ class InfoPage extends StatelessWidget {
                       color: Colors.grey.withOpacity(0.5),
                       spreadRadius: 2,
                       blurRadius: 5,
+                      //changes position of shadow
                       offset: const Offset(0, 3),
                     ),
                   ],
@@ -53,7 +54,7 @@ class InfoPage extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.network(
-                    errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                    errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {//if image not found
                       return const Icon(Icons.image_not_supported_outlined,size: 250,);
                     },
                     image,
@@ -121,16 +122,16 @@ class InfoPage extends StatelessWidget {
                     decoration: BoxDecoration(borderRadius: BorderRadius.circular(90)),
                     child: ElevatedButton(
                       onPressed: () {
-                        _launchUrl(Uri.parse(webURL));
+                        _launchUrl(Uri.parse(webURL));             //launching the url using URL launcher
                       },
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.resolveWith((states) {
+                        backgroundColor: MaterialStateProperty.resolveWith((states) {       //changing the color of button when pressed
                           if (states.contains(MaterialState.pressed)) {
                             return Colors.blue;
                           }
                           return hexStringToColor("#1858d2");
                         }),
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(//changing the shape of button
                           RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         ),
                       ),
@@ -153,8 +154,8 @@ class InfoPage extends StatelessWidget {
     );
   }
 
-  Future<void> _launchUrl(Uri url) async {
-    if (!await launchUrl(url)) {
+  Future<void> _launchUrl(Uri url) async {     //function to launch url
+    if (!await launchUrl(url)) {   //if url not launched
       const SnackBar(
         content:  Text('Could not launch url'),
       );

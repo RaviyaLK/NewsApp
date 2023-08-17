@@ -9,24 +9,26 @@ import '../widgets/colors.dart';
 import '../widgets/news_card.dart';
 import 'infopage.dart';
 
-String searchQuery = '';
-TextEditingController searchController = TextEditingController();
-List<String> searchHistory = [];
-final newsRepositoryProvider = Provider((ref) => NewsService());
-final asyncNewsProvider =AsyncNotifierProvider<AsyncNewsNotifier, List<News>>( () => AsyncNewsNotifier());
-final searchHistoryProvider = StateProvider((ref) => searchHistory);
-final searchBarFocusedProvider = StateProvider<bool>((ref) => false);
-final FocusNode _searchFocusNode = FocusNode();
+String searchQuery = '';//search query to pass to the news api
+TextEditingController searchController = TextEditingController(); //controller for the search bar
+List<String> searchHistory = []; //list of search history
+final newsRepositoryProvider = Provider((ref) => NewsService()); //provider for the news api
+final asyncNewsProvider =AsyncNotifierProvider<AsyncNewsNotifier, List<News>>( () => AsyncNewsNotifier());//provider for the news list
+final searchHistoryProvider = StateProvider((ref) => searchHistory);//provider for the search history
+final searchBarFocusedProvider = StateProvider<bool>((ref) => false);//provider for the search bar focus
+final FocusNode _searchFocusNode = FocusNode(); //focus node for the search bar
 class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
   @override
-  FutureOr<List<News>> build() {
-    return getNews(searchQuery);
+  //builds the news list and callls the get news function 
+  FutureOr<List<News>> build() {                 
+    return getNews(searchQuery); 
   }
 
   Future<List<News>> getNews(searchQuery) async {
-    state = const AsyncLoading();
+    state = const AsyncLoading(); //sets the state to loading
     List<News> list = [];
-    state = await AsyncValue.guard(() async {
+    //gets the news list from the api using the search query
+    state = await AsyncValue.guard(() async { 
       list = await ref.read(newsRepositoryProvider).getNews(searchQuery);
       return list;
     });
@@ -39,9 +41,9 @@ class NewsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Debouncer debouncer = Debouncer();
-    final isSearchBarFocused = ref.watch(searchBarFocusedProvider);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final isSearchBarFocused = ref.watch(searchBarFocusedProvider); //checks if the search bar is focused
+    final screenWidth = MediaQuery.of(context).size.width; //gets the screen width
+    final screenHeight = MediaQuery.of(context).size.height; //gets the screen height
 
     return Scaffold(
       backgroundColor: hexStringToColor("##f4f6f8"),
@@ -59,7 +61,7 @@ class NewsPage extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Container(
-                    width: isSearchBarFocused ? screenWidth * 0.65 : screenWidth * 0.8,
+                    width: isSearchBarFocused ? screenWidth * 0.65 : screenWidth * 0.8, //sets the width of the search bar according to the focus
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(14),
                       color: Colors.grey[300],
@@ -81,31 +83,31 @@ class NewsPage extends ConsumerWidget {
                             onTap: () async {
                               _searchFocusNode.requestFocus();
                               ref.read(searchBarFocusedProvider.notifier).state = true;
-                              final SharedPreferences prefs = await SharedPreferences.getInstance();
+                              final SharedPreferences prefs = await SharedPreferences.getInstance(); //gets the search history from the shared preferences
                               final List<String> searchHist = prefs.getStringList('searchHistory') ?? [];
                               searchHistory = searchHist;
-                              ref.read(searchHistoryProvider.notifier).state = searchHistory;
+                              ref.read(searchHistoryProvider.notifier).state = searchHistory; //sets the search history to the provider
                             },
                             onChanged: (value) {
                               if (value.isNotEmpty) {
                                 debouncer.run(() {
-                                  ref.read(asyncNewsProvider.notifier).getNews(value);
+                                  ref.read(asyncNewsProvider.notifier).getNews(value); //gets the news list from the api using the search query
                                 });
                               } else {
-                                ref.read(asyncNewsProvider.notifier).getNews('Apple');
+                                ref.read(asyncNewsProvider.notifier).getNews('');
                               }
                             },
                             onEditingComplete: () async {
-                              final SharedPreferences prefs = await SharedPreferences.getInstance();
+                              final SharedPreferences prefs = await SharedPreferences.getInstance();//create a shared preferences instance
 
                               if (searchHistory.length > 5 &&
                                   searchController.text.isNotEmpty &&
                                   !searchHistory.contains(searchController.text) &&
-                                  searchController.text != '') {
+                                  searchController.text != '') {//checks if the search history is greater than 5 and if the search query is not empty and if the search query is not already in the search history 
                                 searchHistory.removeAt(0);
                                 searchHistory.add(searchController.text);
-                                await prefs.setStringList('searchHistory', searchHistory);
-                              } else if (searchController.text.isNotEmpty &&
+                                await prefs.setStringList('searchHistory', searchHistory);//sets the search history to the shared preferences
+                              } else if (searchController.text.isNotEmpty && 
                                   !searchHistory.contains(searchController.text) &&
                                   searchController.text != '') {
                                 searchHistory.add(searchController.text);
@@ -134,7 +136,7 @@ class NewsPage extends ConsumerWidget {
                 if (isSearchBarFocused)
                   GestureDetector(
                     onTap: () {
-                      ref.read(searchBarFocusedProvider.notifier).state = false;
+                      ref.read(searchBarFocusedProvider.notifier).state = false; //sets the search bar focus to false
                       _searchFocusNode.unfocus();
                     },
                     child: const Padding(
@@ -175,9 +177,9 @@ class NewsPage extends ConsumerWidget {
                     selectedTileColor: Colors.grey[300],
                     horizontalTitleGap: 4,
                     onTap: () {
-                      searchController.text = searchHistory[index];
-                      ref.read(asyncNewsProvider.notifier).getNews(searchHistory[index]);
-                      ref.read(searchBarFocusedProvider.notifier).state = false;
+                      searchController.text = searchHistory[index]; //sets the search query to the search bar
+                      ref.read(asyncNewsProvider.notifier).getNews(searchHistory[index]); //gets the news list from the api using the search query
+                      ref.read(searchBarFocusedProvider.notifier).state = false; //sets the search bar focus to false
                       _searchFocusNode.unfocus();
                     },
                     title: Text(searchHistory[index], style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -206,7 +208,7 @@ class NewsPage extends ConsumerWidget {
                             onpress: () {
                               Navigator.push(
                                 context,
-                                _createRoute(
+                                _createRoute( //creates a route to the news details page
                                   news[index].urltoImage,
                                   news[index].content,
                                   news[index].description,
@@ -261,7 +263,7 @@ class NewsPage extends ConsumerWidget {
   }
 }
 
-class Debouncer {
+class Debouncer {//debounces the search bar
   final int milliseconds;
   Timer? timer;
 
@@ -271,7 +273,7 @@ class Debouncer {
     if (null != timer) {
       timer!.cancel();
     }
-    timer = Timer(Duration(milliseconds: milliseconds), action);
+    timer = Timer(Duration(milliseconds: milliseconds), action); //waits for 1 second before executing the action
   }
 }
 
@@ -294,7 +296,7 @@ Route _createRoute(
       webURL: webURL,
       image: image,
     ),
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+    transitionsBuilder: (context, animation, secondaryAnimation, child) { //creates a transition animation
       const begin = Offset(1.0, 0.0);
       const end = Offset.zero;
       const curve = Curves.elasticInOut;
