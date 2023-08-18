@@ -159,6 +159,7 @@ class NewsPage extends ConsumerWidget {
             final newsList = ref.watch(asyncNewsProvider);
             if (isSearchBarFocused && searchController.text.isEmpty) {
               return ListView.separated(
+                reverse: true,
                 separatorBuilder: (context, index) => const Padding(
                   padding:  EdgeInsets.only(
                     left: 14.0, 

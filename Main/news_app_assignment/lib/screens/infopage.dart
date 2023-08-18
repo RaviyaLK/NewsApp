@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:news_app_assignment/screens/webview.dart';
 import '../widgets/colors.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'package:webview_flutter/webview_flutter.dart';
 class InfoPage extends StatelessWidget {
   const InfoPage({
     super.key,
@@ -122,7 +123,8 @@ class InfoPage extends StatelessWidget {
                     decoration: BoxDecoration(borderRadius: BorderRadius.circular(90)),
                     child: ElevatedButton(
                       onPressed: () {
-                        _launchUrl(Uri.parse(webURL));             //launching the url using URL launcher
+                        Navigator.of(context).push(createRoute(webURL));
+             
                       },
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.resolveWith((states) {       //changing the color of button when pressed
@@ -154,12 +156,31 @@ class InfoPage extends StatelessWidget {
     );
   }
 
-  Future<void> _launchUrl(Uri url) async {     //function to launch url
-    if (!await launchUrl(url)) {   //if url not launched
-      const SnackBar(
-        content:  Text('Could not launch url'),
+ 
+
+Route createRoute(
+ 
+  String webURL,
+) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => WebViewScreen(
+      
+      
+      webURL: webURL,
+     
+    ),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) { //creates a transition animation
+      const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.elasticInOut;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
       );
-      throw Exception('Could not launch $url');
-    }
-  }
+    },
+  );
+}
 }

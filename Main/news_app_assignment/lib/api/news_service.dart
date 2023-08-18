@@ -10,7 +10,7 @@ class NewsService{
   //retrieve news from api
   Future <List<News> > getNews(String query) async{
     List <News> newsList = [];//list of news
-    String url = 'https://newsapi.org/v2/everything?q=$query&apiKey=682e3e6915184e3384c4df0f4e6f92d4';//url to retrieve news
+    String url = 'https://newsapi.org/v2/everything?q=$query&apiKey=9b64009013aa44e5ae9908b7e11523e2';//url to retrieve news
     final response = await http.get(Uri.parse(url));//get the response from the url
     
    if (response.statusCode==200){
