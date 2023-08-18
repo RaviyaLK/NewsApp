@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:news_app_assignment/screens/webview.dart';
 import '../widgets/colors.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+
 class InfoPage extends StatelessWidget {
   const InfoPage({
     super.key,
