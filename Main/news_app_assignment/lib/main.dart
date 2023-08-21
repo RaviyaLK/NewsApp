@@ -6,10 +6,8 @@ import 'package:news_app_assignment/screens/newspage.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    ProviderScope(
-    child: DevicePreview(
-        builder: (context) => const MainApp(), 
-      ),
+    const ProviderScope(
+    child:  MainApp(),
   ),);
 }
 
@@ -18,11 +16,9 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      locale: DevicePreview.locale(context),
-      builder: DevicePreview.appBuilder,
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home:const NewsPage(),
+      home:NewsPage(),
     );
   }
 }
