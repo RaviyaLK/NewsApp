@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:news_app_assignment/widgets/removespaces.dart';
+import 'package:news_app_assignment/widgets/savelocally.dart';
 import 'dart:async';
 import '../api/news_service.dart';
 import '../model/news_model.dart';
@@ -16,7 +17,10 @@ final newsRepositoryProvider = Provider((ref) => NewsService()); //provider for 
 final asyncNewsProvider =AsyncNotifierProvider<AsyncNewsNotifier, List<News>>( () => AsyncNewsNotifier());//provider for the news list
 final searchHistoryProvider = StateProvider((ref) => searchHistory);//provider for the search history
 final searchBarFocusedProvider = StateProvider<bool>((ref) => false);//provider for the search bar focus
-final FocusNode _searchFocusNode = FocusNode(); //focus node for the search bar
+final FocusNode _searchFocusNode = FocusNode();
+final save = Savelocally();
+final removespaces= Removespaces();
+ //focus node for the search bar
 class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
   @override
   //builds the news list and callls the get news function 
@@ -37,6 +41,8 @@ class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
     return list;
   }
 }
+ 
+
 class NewsPage extends ConsumerWidget {
   const NewsPage({super.key});
 
@@ -83,14 +89,9 @@ class NewsPage extends ConsumerWidget {
                             controller: searchController,
                             focusNode: _searchFocusNode,
                             onTap: () async {
-                              _searchFocusNode.requestFocus();
-                       
-                            
-                              
+                              _searchFocusNode.requestFocus();                    
                               ref.read(searchBarFocusedProvider.notifier).state = true;
-                              final SharedPreferences prefs = await SharedPreferences.getInstance(); //gets the search history from the shared preferences
-                              final List<String> searchHist = prefs.getStringList('searchHistory') ?? [];
-                              searchHistory = searchHist;
+                              searchHistory = await save.readData('searchHistory') ;
                               ref.read(searchHistoryProvider.notifier).state = searchHistory;
                               }, //sets the search history to the provider
                             
@@ -100,22 +101,27 @@ class NewsPage extends ConsumerWidget {
                                   ref.read(asyncNewsProvider.notifier).getNews(value); //gets the news list from the api using the search query
                                 });
                               }
+                              if (value.isEmpty) {
+                                ref.read(asyncNewsProvider.notifier).getNews('Random'); //gets the news list from the api using the search query
+                              }
                             },
+                            
                             onEditingComplete: () async {
-                              final SharedPreferences prefs = await SharedPreferences.getInstance();//create a shared preferences instance
+                              // final SharedPreferences prefs = await SharedPreferences.getInstance();//create a shared preferences instance
                             if(searchController.text.trim().isNotEmpty){
+                              removespaces.removeExtraSpaces(searchController);
                               if (searchHistory.length > 5 &&
                                   searchController.text.trim().isNotEmpty &&
-                                  !searchHistory.contains(searchController.text) &&
-                                  searchController.text != '') {//checks if the search history is greater than 5 and if the search query is not empty and if the search query is not already in the search history 
+                                  !searchHistory.contains(searchController.text)) {//checks if the search history is greater than 5 and if the search query is not empty and if the search query is not already in the search history 
                                 searchHistory.removeAt(0);
-                                searchHistory.add(searchController.text);
-                                await prefs.setStringList('searchHistory', searchHistory);//sets the search history to the shared preferences
+                                searchHistory.add(searchController.text.trim());
+                                save.writeData(searchHistory,'searchHistory'); //sets the search history to the shared preferences
+                               
                               } else if (searchController.text.isNotEmpty && 
-                                  !searchHistory.contains(searchController.text) &&
-                                  searchController.text != '') {
+                                  !searchHistory.contains(searchController.text)) {
                                 searchHistory.add(searchController.text);
-                                await prefs.setStringList('searchHistory', searchHistory);
+                                save.writeData(searchHistory,'searchHistory');
+                                
                               } }                            
                             },
                             decoration: const InputDecoration.collapsed(

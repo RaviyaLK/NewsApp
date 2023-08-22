@@ -34,12 +34,7 @@ late WebViewController    controller = WebViewController()
       onPageStarted: (String url) {},
       onPageFinished: (String url) {},
       onWebResourceError: (WebResourceError error) {},
-      onNavigationRequest: (NavigationRequest request) {
-        if (request.url.startsWith('https://www.youtube.com/')) {
-          return NavigationDecision.prevent;
-        }
-        return NavigationDecision.navigate;
-      },
+      
     ),
   )..loadRequest(Uri.parse(widget.webURL));
 

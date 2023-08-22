@@ -1,19 +1,23 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/src/mock_client.dart';
+import 'package:news_app_assignment/Constants/url.dart';
 
 import '../model/news_model.dart';
 
 class NewsService{
+
   set client(MockClient client) {}
 
   //retrieve news from api
   Future <List<News> > getNews(String query) async{
-    List <News> newsList = [];//list of news
-    String url = 'https://newsapi.org/v2/everything?q=$query&apiKey=682e3e6915184e3384c4df0f4e6f92d4';//url to retrieve news
-    final response = await http.get(Uri.parse(url));//get the response from the url
     
-   if (response.statusCode==200){
+    List <News> newsList = [];
+     UrltoAPI urlob = UrltoAPI(query: query);
+     Uri url = urlob.uriUrl;//list of news
+  //url to retrieve news
+    final response = await http.get(url);//get the response from the url
+     if (response.statusCode==200){
     //if the server returns a 200 OK response
       final jsonResponse= jsonDecode(response.body);//decode the json response
       //loop through the list of news
