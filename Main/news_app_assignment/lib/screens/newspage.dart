@@ -3,6 +3,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:news_app_assignment/widgets/removespaces.dart';
 import 'package:news_app_assignment/widgets/savelocally.dart';
+import 'package:news_app_assignment/widgets/searchbar.dart';
 import 'dart:async';
 import '../api/news_service.dart';
 import '../model/news_model.dart';
@@ -17,7 +18,7 @@ final newsRepositoryProvider = Provider((ref) => NewsService()); //provider for 
 final asyncNewsProvider =AsyncNotifierProvider<AsyncNewsNotifier, List<News>>( () => AsyncNewsNotifier());//provider for the news list
 final searchHistoryProvider = StateProvider((ref) => searchHistory);//provider for the search history
 final searchBarFocusedProvider = StateProvider<bool>((ref) => false);//provider for the search bar focus
-final FocusNode _searchFocusNode = FocusNode();
+final FocusNode searchFocusNode = FocusNode();
 final save = Savelocally();
 final removespaces= Removespaces();
  //focus node for the search bar
@@ -65,7 +66,8 @@ class NewsPage extends ConsumerWidget {
           preferredSize: Size.fromHeight(MediaQuery.of(context).size.height * 0.09),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 12, 12, 20),
-            child: Row(
+            child:
+             Row(
               children: [
                 Expanded(
                   child: Container(
@@ -74,80 +76,51 @@ class NewsPage extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(14),
                       color: Colors.grey[300],
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Icon(Icons.search, color: Colors.grey),
-                        ),
-                        Expanded(
-                          child: TextField(
-                            textCapitalization: TextCapitalization.words,
-                            autofocus: false,
-                            autocorrect: true,
-                            controller: searchController,
-                            focusNode: _searchFocusNode,
-                            onTap: () async {
-                              _searchFocusNode.requestFocus();                    
-                              ref.read(searchBarFocusedProvider.notifier).state = true;
-                              searchHistory = await save.readData('searchHistory') ;
-                              ref.read(searchHistoryProvider.notifier).state = searchHistory;
-                              }, //sets the search history to the provider
-                            
-                            onChanged: (value) {
-                              if (value.isNotEmpty&&searchController.text.trim().isNotEmpty) {
-                                debouncer.run(() {
-                                  ref.read(asyncNewsProvider.notifier).getNews(value); //gets the news list from the api using the search query
-                                });
-                              }
-                              if (value.isEmpty) {
-                                ref.read(asyncNewsProvider.notifier).getNews('Random'); //gets the news list from the api using the search query
-                              }
-                            },
-                            
-                            onEditingComplete: () async {
-                              // final SharedPreferences prefs = await SharedPreferences.getInstance();//create a shared preferences instance
-                            if(searchController.text.trim().isNotEmpty){
-                              removespaces.removeExtraSpaces(searchController);
-                              if (searchHistory.length > 5 &&
-                                  searchController.text.trim().isNotEmpty &&
-                                  !searchHistory.contains(searchController.text)) {//checks if the search history is greater than 5 and if the search query is not empty and if the search query is not already in the search history 
-                                searchHistory.removeAt(0);
-                                searchHistory.add(searchController.text.trim());
-                                save.writeData(searchHistory,'searchHistory'); //sets the search history to the shared preferences
-                               
-                              } else if (searchController.text.isNotEmpty && 
-                                  !searchHistory.contains(searchController.text)) {
-                                searchHistory.add(searchController.text);
-                                save.writeData(searchHistory,'searchHistory');
-                                
-                              } }                            
-                            },
-                            decoration: const InputDecoration.collapsed(
-                              hintStyle: TextStyle(color: Colors.grey),
-                              hintText: 'Search',
-                            ),
-                          ),
-                        ),
-                        if (isSearchBarFocused)
-                        IconButton(
-                          icon:const Icon(Icons.close, color: Colors.grey,size: 20,),
-                          onPressed:(){ 
-                            searchController.clear();
-                          _searchFocusNode.unfocus();
-
-                          },
-                         ),
-                      ],
-                    ),
+                    child:CustomSearchBar(
+                      onTap: ()async {
+                      searchFocusNode.requestFocus();                    
+                      ref.read(searchBarFocusedProvider.notifier).state = true;
+                      searchHistory = await save.readData('searchHistory') ;
+                      ref.read(searchHistoryProvider.notifier).state = searchHistory;
+                    },
+                     onChanged:(value){
+                      if (value.isNotEmpty&&searchController.text.trim().isNotEmpty) {
+                        debouncer.run(() {
+                         ref.read(asyncNewsProvider.notifier).getNews(value); //gets the news list from the api using the search query
+                         });
+                        }
+                      if (value.isEmpty) {
+                        ref.read(asyncNewsProvider.notifier).getNews('Random'); //gets the news list from the api using the search query
+                        }
+                     }, 
+                     onEditingComplete:(){
+                      if(searchController.text.trim().isNotEmpty){
+                        removespaces.removeExtraSpaces(searchController);
+                        if (searchHistory.length > 5 &&
+                           searchController.text.trim().isNotEmpty &&
+                           !searchHistory.contains(searchController.text)) {//checks if the search history is greater than 5 and if the search query is not empty and if the search query is not already in the search history 
+                          searchHistory.removeAt(0);
+                          searchHistory.add(searchController.text.trim());
+                          save.writeData(searchHistory,'searchHistory'); //sets the search history to the shared preferences
+                         
+                        } else if (searchController.text.isNotEmpty && 
+                            !searchHistory.contains(searchController.text)) {
+                          searchHistory.add(searchController.text);
+                          save.writeData(searchHistory,'searchHistory');
+                          
+                        } } 
+                     },
+                      isSearchBarFocused: isSearchBarFocused, 
+                      searchFocusNode: searchFocusNode, 
+                      searchController: searchController,) 
+                   
                   ),
                 ),
                 if (isSearchBarFocused)
                   GestureDetector(
                     onTap: () {
                       ref.read(searchBarFocusedProvider.notifier).state = false; //sets the search bar focus to false
-                      _searchFocusNode.unfocus();
+                      searchFocusNode.unfocus();
                     },
                     child: const Padding(
                       padding: EdgeInsets.all(10.0),
@@ -191,7 +164,7 @@ class NewsPage extends ConsumerWidget {
                       searchController.text = searchHistory[index]; //sets the search query to the search bar
                       ref.read(asyncNewsProvider.notifier).getNews(searchHistory[index]); //gets the news list from the api using the search query
                       ref.read(searchBarFocusedProvider.notifier).state = false; //sets the search bar focus to false
-                      _searchFocusNode.unfocus();
+                      searchFocusNode.unfocus();
                     },
                     title: Text(searchHistory[index], style: const TextStyle(fontWeight: FontWeight.bold)),
                   );
