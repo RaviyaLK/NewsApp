@@ -27,10 +27,12 @@ class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
   Future<List<News>> getNews(searchQuery) async {
     state = const AsyncLoading(); //sets the state to loading
     List<News> list = [];
+    
     //gets the news list from the api using the search query
-    state = await AsyncValue.guard(() async { 
-      list = await ref.read(newsRepositoryProvider).getNews(searchQuery);
-      return list;
+    
+    state = await AsyncValue.guard(() async { //sets the state to success
+      list = await ref.read(newsRepositoryProvider).getNews(searchQuery);//gets the news list from the api
+      return list;//returns the news list
     });
     return list;
   }
@@ -40,7 +42,7 @@ class NewsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Debouncer debouncer = Debouncer();
+    Debouncer debouncer = Debouncer();//
     final isSearchBarFocused = ref.watch(searchBarFocusedProvider); //checks if the search bar is focused
     final screenWidth = MediaQuery.of(context).size.width; //gets the screen width
     final screenHeight = MediaQuery.of(context).size.height; //gets the screen height
@@ -82,26 +84,28 @@ class NewsPage extends ConsumerWidget {
                             focusNode: _searchFocusNode,
                             onTap: () async {
                               _searchFocusNode.requestFocus();
+                       
+                            
+                              
                               ref.read(searchBarFocusedProvider.notifier).state = true;
                               final SharedPreferences prefs = await SharedPreferences.getInstance(); //gets the search history from the shared preferences
                               final List<String> searchHist = prefs.getStringList('searchHistory') ?? [];
                               searchHistory = searchHist;
-                              ref.read(searchHistoryProvider.notifier).state = searchHistory; //sets the search history to the provider
-                            },
+                              ref.read(searchHistoryProvider.notifier).state = searchHistory;
+                              }, //sets the search history to the provider
+                            
                             onChanged: (value) {
-                              if (value.isNotEmpty) {
+                              if (value.isNotEmpty&&searchController.text.trim().isNotEmpty) {
                                 debouncer.run(() {
                                   ref.read(asyncNewsProvider.notifier).getNews(value); //gets the news list from the api using the search query
                                 });
-                              } else {
-                                ref.read(asyncNewsProvider.notifier).getNews('');
                               }
                             },
                             onEditingComplete: () async {
                               final SharedPreferences prefs = await SharedPreferences.getInstance();//create a shared preferences instance
-
+                            if(searchController.text.trim().isNotEmpty){
                               if (searchHistory.length > 5 &&
-                                  searchController.text.isNotEmpty &&
+                                  searchController.text.trim().isNotEmpty &&
                                   !searchHistory.contains(searchController.text) &&
                                   searchController.text != '') {//checks if the search history is greater than 5 and if the search query is not empty and if the search query is not already in the search history 
                                 searchHistory.removeAt(0);
@@ -112,7 +116,7 @@ class NewsPage extends ConsumerWidget {
                                   searchController.text != '') {
                                 searchHistory.add(searchController.text);
                                 await prefs.setStringList('searchHistory', searchHistory);
-                              }                              
+                              } }                            
                             },
                             decoration: const InputDecoration.collapsed(
                               hintStyle: TextStyle(color: Colors.grey),

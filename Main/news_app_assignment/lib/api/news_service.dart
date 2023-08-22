@@ -10,17 +10,17 @@ class NewsService{
   //retrieve news from api
   Future <List<News> > getNews(String query) async{
     List <News> newsList = [];//list of news
-    String url = 'https://newsapi.org/v2/everything?q=$query&apiKey=9b64009013aa44e5ae9908b7e11523e2';//url to retrieve news
+    String url = 'https://newsapi.org/v2/everything?q=$query&apiKey=682e3e6915184e3384c4df0f4e6f92d4';//url to retrieve news
     final response = await http.get(Uri.parse(url));//get the response from the url
     
    if (response.statusCode==200){
     //if the server returns a 200 OK response
-      final jsonResponse= jsonDecode(response.body);
+      final jsonResponse= jsonDecode(response.body);//decode the json response
       //loop through the list of news
       for (final news in jsonResponse['articles']){
         //check if the news has all the required fields
         if(news['urlToImage']!=null && news["description"]!=null && news['author']!=null) {
-          final data = News(
+          final data = News(//create a news object
 
               webURL: news['url'],
               date: news['publishedAt'],
@@ -30,7 +30,7 @@ class NewsService{
               content: news["content"],
               author: news['author']);
               
-          newsList.add(data);
+          newsList.add(data);//add the news to the list
         }
       }
       
