@@ -31,7 +31,7 @@ void main() {
       final newsService = NewsService();
       newsService.client = mockClient;
 
-      final newsList = await newsService.getNews('sample_query');
+      final newsList = await newsService.getNews('sample_query',1);
 
       expect(newsList, isA<List<News>>());
       // expect(newsList.length, 1);
@@ -56,7 +56,7 @@ void main() {
       final newsService = NewsService();
       newsService.client = mockClient;
 
-      final newsList = await newsService.getNews('sample_query');
+      final newsList = await newsService.getNews('sample_query',1);
 
       expect(newsList, isA<List<News>>());
       expect(newsList.length, 0); // No news should be added due to missing fields
@@ -71,7 +71,7 @@ void main() {
       final newsService = NewsService();
       newsService.client = mockClient;
         // Use expectAsync to handle asynchronous exception assertion
-      expectLater(() => newsService.getNews(''), throwsA(isA<Exception>()));
+      expectLater(() => newsService.getNews('',0), throwsA(isA<Exception>()));
     });
   });
 }

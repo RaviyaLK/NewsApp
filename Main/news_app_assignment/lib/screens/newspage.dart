@@ -21,22 +21,25 @@ final searchBarFocusedProvider = StateProvider<bool>((ref) => false);//provider 
 final FocusNode searchFocusNode = FocusNode();
 final save = Savelocally();
 final removespaces= Removespaces();
- //focus node for the search bar
+final scrollController = ScrollController();
+int pageNum = 1;
+ //page number for the news api
+
 class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
   @override
-  //builds the news list and callls the get news function 
+
   FutureOr<List<News>> build() {                 
-    return getNews(searchQuery); 
+    return getNews(searchQuery,pageNum); 
   }
 
-  Future<List<News>> getNews(searchQuery) async {
+  Future<List<News>> getNews(searchQuery,pageNum) async {
     state = const AsyncLoading(); //sets the state to loading
     List<News> list = [];
     
     //gets the news list from the api using the search query
     
     state = await AsyncValue.guard(() async { //sets the state to success
-      list = await ref.read(newsRepositoryProvider).getNews(searchQuery);//gets the news list from the api
+      list = await ref.read(newsRepositoryProvider).getNews(searchQuery,pageNum);//gets the news list from the api
       return list;//returns the news list
     });
     return list;
@@ -46,6 +49,8 @@ class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
 
 class NewsPage extends ConsumerWidget {
   const NewsPage({super.key});
+  
+  
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -86,11 +91,11 @@ class NewsPage extends ConsumerWidget {
                      onChanged:(value){
                       if (value.isNotEmpty&&searchController.text.trim().isNotEmpty) {
                         debouncer.run(() {
-                         ref.read(asyncNewsProvider.notifier).getNews(value); //gets the news list from the api using the search query
+                         ref.read(asyncNewsProvider.notifier).getNews(value,pageNum); //gets the news list from the api using the search query
                          });
                         }
                       if (value.isEmpty) {
-                        ref.read(asyncNewsProvider.notifier).getNews('Random'); //gets the news list from the api using the search query
+                        ref.read(asyncNewsProvider.notifier).getNews('Random',pageNum); //gets the news list from the api using the search query
                         }
                      }, 
                      onEditingComplete:(){
@@ -162,7 +167,7 @@ class NewsPage extends ConsumerWidget {
                     horizontalTitleGap: 4,
                     onTap: () {
                       searchController.text = searchHistory[index]; //sets the search query to the search bar
-                      ref.read(asyncNewsProvider.notifier).getNews(searchHistory[index]); //gets the news list from the api using the search query
+                      ref.read(asyncNewsProvider.notifier).getNews(searchHistory[index],pageNum); //gets the news list from the api using the search query
                       ref.read(searchBarFocusedProvider.notifier).state = false; //sets the search bar focus to false
                       searchFocusNode.unfocus();
                     },
@@ -178,7 +183,7 @@ class NewsPage extends ConsumerWidget {
                     child: ListView.separated(
                       separatorBuilder: (context, index) => const SizedBox(height: 20),
                       shrinkWrap: true,
-                      controller: ScrollController(keepScrollOffset: false),
+                      controller: scrollController,
                       itemCount: news.length < 10 ? news.length : 10,
                       itemBuilder: (context, index) {
                         return AnimatedOpacity(

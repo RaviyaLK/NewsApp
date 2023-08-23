@@ -10,10 +10,10 @@ class NewsService{
   set client(MockClient client) {}
 
   //retrieve news from api
-  Future <List<News> > getNews(String query) async{
+  Future <List<News> > getNews(String query,int pageNum) async{
     
     List <News> newsList = [];
-     UrltoAPI urlob = UrltoAPI(query: query);
+     UrltoAPI urlob = UrltoAPI(query: query, pageNum: pageNum);
      Uri url = urlob.uriUrl;//list of news
   //url to retrieve news
     final response = await http.get(url);//get the response from the url
