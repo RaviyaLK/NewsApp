@@ -1,3 +1,5 @@
+
+
 class UrltoAPI  {
   UrltoAPI({
    required this.query,
@@ -5,16 +7,16 @@ class UrltoAPI  {
   });
  final String query;
  final int pageNum;
+  //url to retrieve news
 late Uri uriUrl= Uri(
   scheme:'https' ,
   host: 'newsapi.org', 
   path:'/v2/everything/' ,
   queryParameters: {
     'q': query, 
-    'apiKey': '8a17dee278024745bc5c0cbf31db9e0a',
+    'apiKey': 'a2a13804f1b846e5931bff67d979354e',
     'pageSize': '10',
-    'page': '$pageNum'
-    },
+    'page': '$pageNum',},
     
    );
 

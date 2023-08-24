@@ -8,12 +8,14 @@ writeData(List<String>searchHistory,String listname) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
    await prefs.setStringList(listname, searchHistory);
 }
-readData(String listname)async{
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-   prefs.getStringList(listname) ?? [];
-   return prefs.getStringList(listname) ?? [];
+ Future<List<String>> readData(String listname) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+   
+    return prefs.getStringList(listname) ?? []; // Return an empty list if the data is null
+    
+  }
   // return searchHist;
-}
+
 
 
 

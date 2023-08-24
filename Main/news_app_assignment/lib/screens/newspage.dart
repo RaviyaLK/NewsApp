@@ -29,10 +29,10 @@ class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
   @override
 
   FutureOr<List<News>> build() {                 
-    return getNews(searchQuery,pageNum); 
+    return getNews(searchQuery); 
   }
 
-  Future<List<News>> getNews(searchQuery,pageNum) async {
+  Future<List<News>> getNews(searchQuery) async {
     state = const AsyncLoading(); //sets the state to loading
     List<News> list = [];
     
@@ -91,11 +91,11 @@ class NewsPage extends ConsumerWidget {
                      onChanged:(value){
                       if (value.isNotEmpty&&searchController.text.trim().isNotEmpty) {
                         debouncer.run(() {
-                         ref.read(asyncNewsProvider.notifier).getNews(value,pageNum); //gets the news list from the api using the search query
+                         ref.read(asyncNewsProvider.notifier).getNews(value); //gets the news list from the api using the search query
                          });
                         }
                       if (value.isEmpty) {
-                        ref.read(asyncNewsProvider.notifier).getNews('Random',pageNum); //gets the news list from the api using the search query
+                        ref.read(asyncNewsProvider.notifier).getNews('Random'); //gets the news list from the api using the search query
                         }
                      }, 
                      onEditingComplete:(){
@@ -167,7 +167,7 @@ class NewsPage extends ConsumerWidget {
                     horizontalTitleGap: 4,
                     onTap: () {
                       searchController.text = searchHistory[index]; //sets the search query to the search bar
-                      ref.read(asyncNewsProvider.notifier).getNews(searchHistory[index],pageNum); //gets the news list from the api using the search query
+                      ref.read(asyncNewsProvider.notifier).getNews(searchHistory[index]); //gets the news list from the api using the search query
                       ref.read(searchBarFocusedProvider.notifier).state = false; //sets the search bar focus to false
                       searchFocusNode.unfocus();
                     },
