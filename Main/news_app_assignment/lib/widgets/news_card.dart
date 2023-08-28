@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 
 class NewsCard extends StatelessWidget {
@@ -40,19 +41,39 @@ class NewsCard extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      image: DecorationImage(
-                        onError: (exception, stackTrace) => const Icon(Icons.error),
-                        scale: 1,
-                        image: NetworkImage(image,
-                        ),
-                        alignment: Alignment.center,
-                        fit: BoxFit.cover,
-                      ),
+                  child:ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.network(
+                      image,
+                      errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {//if image not found
+                        return const Icon(Icons.image_not_supported_outlined,size: 250,);
+                      },
+                      fit: BoxFit.cover,
+                      
+                      loadingBuilder: (BuildContext context, Widget child,ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: LoadingAnimationWidget.waveDots(
+                           color: Colors.blue,
+                             size: 20,
+                          ),
+                        );
+                      }
                     ),
                   ),
+                  // child: Container(
+                  //   decoration: BoxDecoration(
+                  //     borderRadius: BorderRadius.circular(14),
+                  //     image: DecorationImage(
+                  //       onError: (exception, stackTrace) => const Icon(Icons.error),
+                  //       scale: 1,
+                  //       image: NetworkImage(image,
+                  //       ),
+                  //       alignment: Alignment.center,
+                  //       fit: BoxFit.cover,
+                  //     ),
+                  //   ),
+                  // ),
                 ),
               ),
             ),
@@ -65,10 +86,7 @@ class NewsCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w400,
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -77,21 +95,14 @@ class NewsCard extends StatelessWidget {
                       description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.blueGrey,
-                        fontSize: 13,
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     SizedBox(height: screenHeight*0.02),                   
                     Padding(                      
                       padding: EdgeInsets.only(left: screenwidth*0.3),
                       child: Text(
                         date,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
                   ],

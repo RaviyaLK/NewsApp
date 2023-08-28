@@ -4,9 +4,11 @@ class UrltoAPI  {
   UrltoAPI({
    required this.query,
    required this.pageNum,
+   required this.limit,
   });
  final String query;
  final int pageNum;
+ final int limit;
   //url to retrieve news
 late Uri uriUrl= Uri(
   scheme:'https' ,
@@ -14,8 +16,8 @@ late Uri uriUrl= Uri(
   path:'/v2/everything/' ,
   queryParameters: {
     'q': query, 
-    'apiKey': 'a2a13804f1b846e5931bff67d979354e',
-    'pageSize': '10',
+    'apiKey': 'fca8c021d0892938b19379a87ae7638c ',
+    'pageSize': '$limit',
     'page': '$pageNum',},
     
    );

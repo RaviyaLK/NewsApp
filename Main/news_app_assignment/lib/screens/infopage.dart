@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:news_app_assignment/screens/webview.dart';
-import '../widgets/colors.dart';
+import '../Constants/string_const.dart';
+import '../Constants/colors.dart';
+
 
 class InfoPage extends StatelessWidget {
-  const InfoPage({
+   const InfoPage({
     super.key,
     required this.title,
     required this.description,
@@ -22,14 +24,15 @@ class InfoPage extends StatelessWidget {
   final String author;
   final String webURL;
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: hexStringToColor("#ffffff"),//Colors.white,
+      backgroundColor: appBackground,//Colors.white,
       appBar: AppBar(
         elevation: 0,
         shadowColor: Colors.grey,
-        backgroundColor: hexStringToColor("#1858d2"),//Colors.blue[900],
+        backgroundColor: appbarBackground,//Colors.blue[900],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -75,17 +78,13 @@ class InfoPage extends StatelessWidget {
                   FittedBox(
                     child: Text(                    
                       author.trim(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
                   FittedBox(
                     child: Text(
                       date,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style:  Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
                 ],
@@ -99,7 +98,7 @@ class InfoPage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
                   child: Text(
                     title,
-                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                    style:  Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -107,11 +106,7 @@ class InfoPage extends StatelessWidget {
                   child: Text(
                     content,
                     maxLines: 9,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w300,
-                      color: Colors.blueGrey,
-                      fontSize: 16,
-                    ),
+                    style:Theme.of(context).textTheme.bodyLarge,
                   ),
                 ),
                 Center(
@@ -130,14 +125,14 @@ class InfoPage extends StatelessWidget {
                           if (states.contains(MaterialState.pressed)) {
                             return Colors.blue;
                           }
-                          return hexStringToColor("#1858d2");
+                          return buttonColor;
                         }),
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(//changing the shape of button
                           RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         ),
                       ),
                       child: const Text(
-                        "Read the Full article",
+                       buttonName,
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:news_app_assignment/Constants/string_const.dart';
+import 'package:news_app_assignment/widgets/debouncer.dart';
 import 'package:news_app_assignment/widgets/removespaces.dart';
 import 'package:news_app_assignment/widgets/savelocally.dart';
 import 'package:news_app_assignment/widgets/searchbar.dart';
 import 'dart:async';
 import '../api/news_service.dart';
 import '../model/news_model.dart';
-import '../widgets/colors.dart';
+import '../Constants/colors.dart';
 import '../widgets/news_card.dart';
 import 'infopage.dart';
 
+
 String searchQuery = '';//search query to pass to the news api
+final searchQueryProvider= StateProvider((ref) => searchQuery);//provider for the search query
 TextEditingController searchController = TextEditingController(); //controller for the search bar
 List<String> searchHistory = []; //list of search history
 final newsRepositoryProvider = Provider((ref) => NewsService()); //provider for the news api
@@ -22,51 +26,95 @@ final FocusNode searchFocusNode = FocusNode();
 final save = Savelocally();
 final removespaces= Removespaces();
 final scrollController = ScrollController();
+final scrollProvider= StateProvider((ref) => scrollController);
+final Debouncer debouncer = Debouncer();
 int pageNum = 1;
- //page number for the news api
+bool isLoading = false;
+List<News> list = []; 
+List<News> loadedNews = [];
+
+int limit =10;
+bool isAllLoaded = false;
+
+
+ 
 
 class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
-  @override
 
-  FutureOr<List<News>> build() {                 
-    return getNews(searchQuery); 
+  @override
+  FutureOr<List<News>> build() {
+    return loadedNews;
   }
 
-  Future<List<News>> getNews(searchQuery) async {
+ 
+
+  Future<List<News>> getNews(searchQuery,pageNum) async {
     state = const AsyncLoading(); //sets the state to loading
-    List<News> list = [];
+
     
     //gets the news list from the api using the search query
     
     state = await AsyncValue.guard(() async { //sets the state to success
-      list = await ref.read(newsRepositoryProvider).getNews(searchQuery,pageNum);//gets the news list from the api
+      list = await ref.read(newsRepositoryProvider).getNews(searchQuery,pageNum,limit);//gets the news list from the api
       return list;//returns the news list
     });
+    
     return list;
   }
+  Future<List<News>> fetch() async {
+    
+  isLoading = true;
+  pageNum++;
+
+  state = await AsyncValue.guard(() async {
+  loadedNews = await ref.read(newsRepositoryProvider).getMoreNews(searchQuery,pageNum,limit);
+
+  list.addAll(loadedNews);
+  if (loadedNews.isEmpty) {
+   isAllLoaded = true;
+  }
+  isLoading = false;
+  return list;
+  });
+  return list;
+
 }
- 
+}
+void dispose (){
+  scrollController.dispose();
+  searchController.dispose();
+  searchFocusNode.dispose();
+    
+}
 
 class NewsPage extends ConsumerWidget {
   const NewsPage({super.key});
   
-  
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Debouncer debouncer = Debouncer();//
+    final scroller = ref.watch(scrollProvider);
+    Debouncer debouncer = Debouncer();
+    scroller.addListener(() {
+      
+    
+      if (scroller.position.pixels == scroller.position.maxScrollExtent) {
+        ref.read(asyncNewsProvider.notifier).fetch();
+        print("reached the end");
+      }
+     });
+    
     final isSearchBarFocused = ref.watch(searchBarFocusedProvider); //checks if the search bar is focused
     final screenWidth = MediaQuery.of(context).size.width; //gets the screen width
     final screenHeight = MediaQuery.of(context).size.height; //gets the screen height
 
     return Scaffold(
-      backgroundColor: hexStringToColor("##f4f6f8"),
+      backgroundColor: appBackground,
       appBar: AppBar(
         elevation: 2,
         shadowColor: Colors.grey,
-        backgroundColor: hexStringToColor("#1858d2"),
+        backgroundColor:appbarBackground,
         centerTitle: true,
-        title: const Text('News Feed'),
+        title: const Text(headline),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(MediaQuery.of(context).size.height * 0.09),
           child: Padding(
@@ -85,17 +133,18 @@ class NewsPage extends ConsumerWidget {
                       onTap: ()async {
                       searchFocusNode.requestFocus();                    
                       ref.read(searchBarFocusedProvider.notifier).state = true;
-                      searchHistory = await save.readData('searchHistory') ;
+                      searchHistory = await save.readData(saveFile) ;
                       ref.read(searchHistoryProvider.notifier).state = searchHistory;
+                     
                     },
                      onChanged:(value){
                       if (value.isNotEmpty&&searchController.text.trim().isNotEmpty) {
                         debouncer.run(() {
-                         ref.read(asyncNewsProvider.notifier).getNews(value); //gets the news list from the api using the search query
+                         ref.read(asyncNewsProvider.notifier).getNews(value,pageNum); //gets the news list from the api using the search query
                          });
                         }
                       if (value.isEmpty) {
-                        ref.read(asyncNewsProvider.notifier).getNews('Random'); //gets the news list from the api using the search query
+                        ref.read(asyncNewsProvider.notifier).getNews(randomText,pageNum); //gets the news list from the api using the search query
                         }
                      }, 
                      onEditingComplete:(){
@@ -106,12 +155,12 @@ class NewsPage extends ConsumerWidget {
                            !searchHistory.contains(searchController.text)) {//checks if the search history is greater than 5 and if the search query is not empty and if the search query is not already in the search history 
                           searchHistory.removeAt(0);
                           searchHistory.add(searchController.text.trim());
-                          save.writeData(searchHistory,'searchHistory'); //sets the search history to the shared preferences
-                         
+                          save.writeData(searchHistory,saveFile); //sets the search history to the shared preferences
+                          
                         } else if (searchController.text.isNotEmpty && 
                             !searchHistory.contains(searchController.text)) {
                           searchHistory.add(searchController.text);
-                          save.writeData(searchHistory,'searchHistory');
+                          save.writeData(searchHistory,saveFile);
                           
                         } } 
                      },
@@ -127,11 +176,11 @@ class NewsPage extends ConsumerWidget {
                       ref.read(searchBarFocusedProvider.notifier).state = false; //sets the search bar focus to false
                       searchFocusNode.unfocus();
                     },
-                    child: const Padding(
-                      padding: EdgeInsets.all(10.0),
+                    child:  Padding(
+                      padding: const EdgeInsets.all(10.0),
                       child: Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.white, fontSize: 17),
+                        cancel,
+                        style: Theme.of(context).textTheme.displaySmall,
                       ),
                     ),
                   ),
@@ -140,131 +189,151 @@ class NewsPage extends ConsumerWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Consumer(
-          builder: (context, ref, child) {
-            final newsList = ref.watch(asyncNewsProvider);
-            if (isSearchBarFocused && searchController.text.isEmpty) {
-              return ListView.separated(
-                reverse: true,
-                separatorBuilder: (context, index) => const Padding(
-                  padding:  EdgeInsets.only(
-                    left: 14.0, 
-                    right: 14.0),
-                  child:  Divider(
-                    height: 1,
-                    thickness: 1,
-                    )),
-                shrinkWrap: true,
-                itemCount: searchHistory.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    hoverColor: Colors.grey[300],                      
-                    tileColor: Colors.white,
-                    leading: const Icon(Icons.history),
-                    selectedTileColor: Colors.grey[300],
-                    horizontalTitleGap: 4,
-                    onTap: () {
-                      searchController.text = searchHistory[index]; //sets the search query to the search bar
-                      ref.read(asyncNewsProvider.notifier).getNews(searchHistory[index]); //gets the news list from the api using the search query
-                      ref.read(searchBarFocusedProvider.notifier).state = false; //sets the search bar focus to false
-                      searchFocusNode.unfocus();
+      body: Consumer(
+        builder: (context, ref, child) {
+          final newsList = ref.watch(asyncNewsProvider);
+         
+          searchQuery =ref.watch(searchQueryProvider.notifier).state;
+          if (isSearchBarFocused && searchController.text.isEmpty) {
+            return ListView.separated(
+              reverse: true,
+              separatorBuilder: (context, index) => const Padding(
+                padding:  EdgeInsets.only(
+                  left: 14.0, 
+                  right: 14.0),
+                child:  Divider(
+                  height: 1,
+                  thickness: 1,
+                  )),
+              shrinkWrap: true,
+              itemCount: searchHistory.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  hoverColor: Colors.grey[300],                      
+                  tileColor: Colors.white,
+                  leading: const Icon(Icons.history),
+                  selectedTileColor: Colors.grey[300],
+                  horizontalTitleGap: 4,
+                  onTap: () {
+                    searchController.text = searchHistory[index];
+                    ref.read(searchQueryProvider.notifier).state = searchController.text; //sets the search query to the search bar
+                    ref.read(asyncNewsProvider.notifier).getNews(searchHistory[index],pageNum); //gets the news list from the api using the search query
+                    ref.read(searchBarFocusedProvider.notifier).state = false; //sets the search bar focus to false
+                    searchFocusNode.unfocus();
+                    
+                  },
+                  title: Text(searchHistory[index], style: const TextStyle(fontWeight: FontWeight.bold)),
+                );
+              },
+            );
+          } else {
+            return newsList.when(
+              data: (news) {
+                return Padding(
+                  padding: const EdgeInsets.all(14.0),
+                  child: ListView.separated(
+                    separatorBuilder: (context, index) => const SizedBox(height: 20),
+                    shrinkWrap: true,
+                    controller:scrollController,
+                    
+                    itemCount: news.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index<news.length ){
+                 
+                      return AnimatedOpacity(
+                        duration: const Duration(milliseconds: 500),
+                        opacity: 1,
+                        child: NewsCard(
+                          title: news[index].title,
+                          description: news[index].description,
+                          image: news[index].urltoImage,
+                          date: news[index].date.substring(0, 10),
+                          onpress: () {
+                            Navigator.push(
+                              context,
+                              _createRoute( //creates a route to the news details page
+                                news[index].urltoImage,
+                                news[index].content,
+                                news[index].description,
+                                news[index].title,
+                                news[index].date.substring(0, 10),
+                                news[index].author,
+                                news[index].webURL,
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                     }
+                     else  if(searchQuery.isNotEmpty && isAllLoaded == false){
+                      return const  Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child:  Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                     }
+                     else if(isAllLoaded == true){
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child:  Center(
+                          child: Text(
+                            "No more news",
+                            style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                        ),
+                      );
+
+                     }
+                     else{
+                      return const SizedBox(height: 20);
+                     }
                     },
-                    title: Text(searchHistory[index], style: const TextStyle(fontWeight: FontWeight.bold)),
-                  );
-                },
-              );
-            } else {
-              return newsList.when(
-                data: (news) {
-                  return Padding(
-                    padding: const EdgeInsets.all(14.0),
-                    child: ListView.separated(
-                      separatorBuilder: (context, index) => const SizedBox(height: 20),
-                      shrinkWrap: true,
-                      controller: scrollController,
-                      itemCount: news.length < 10 ? news.length : 10,
-                      itemBuilder: (context, index) {
-                        return AnimatedOpacity(
-                          duration: const Duration(milliseconds: 500),
-                          opacity: 1,
-                          child: NewsCard(
-                            title: news[index].title,
-                            description: news[index].description,
-                            image: news[index].urltoImage,
-                            date: news[index].date.substring(0, 10),
-                            onpress: () {
-                              Navigator.push(
-                                context,
-                                _createRoute( //creates a route to the news details page
-                                  news[index].urltoImage,
-                                  news[index].content,
-                                  news[index].description,
-                                  news[index].title,
-                                  news[index].date.substring(0, 10),
-                                  news[index].author,
-                                  news[index].webURL,
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
+                  ),
+                );
+              },
+              error: (e, _) {
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Error: $e",style: Theme.of(context).textTheme.bodyLarge),
                     ),
-                  );
-                },
-                error: (e, _) {
-                  return Column(
-                    children: [
-                     
-                      Padding(
+                   
+                    Expanded(
+                      child: Padding(
                         padding: const EdgeInsets.only(top: 0, bottom: 0),
                         child: Center(
                           child: Image(
                             height: screenHeight * 0.5,
                             width: screenWidth * 0.7,
-                            image: const NetworkImage(
-                              "https://cdn-icons-png.flaticon.com/512/755/755014.png",
-                            ),
+                            image: const AssetImage('lib/assets/ErrorImage.png'),
                           ),
                         ),
                       ),
-                       Text("Error: $e",style: const TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
-                       
-                    ], 
-                  );
-                },
-                loading: () => Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
-                  child: Center(
-                    child: LoadingAnimationWidget.staggeredDotsWave(
-                      color: Colors.blue,
-                      size: 100,
                     ),
+                     
+                     
+                  ], 
+                );
+              },
+              loading: () => Padding(
+                padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
+                child: Center(
+                  child: LoadingAnimationWidget.staggeredDotsWave(
+                    color: Colors.blue,
+                    size: 100,
                   ),
                 ),
-              );
-            }
-          }),
-      ),
+              ),
+            );
+          }
+        }),
     );
   }
 }
 
-class Debouncer {//debounces the search bar
-  final int milliseconds;
-  Timer? timer;
 
-  Debouncer({this.milliseconds = 1000});
-
-  run(VoidCallback action) {
-    if (null != timer) {
-      timer!.cancel();
-    }
-    timer = Timer(Duration(milliseconds: milliseconds), action); //waits for 1 second before executing the action
-  }
-}
 
 Route _createRoute(
   String image,
