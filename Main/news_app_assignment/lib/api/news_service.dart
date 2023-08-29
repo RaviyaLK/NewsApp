@@ -63,7 +63,7 @@ class NewsService{
       //loop through the list of news
       for (final news in jsonResponse['articles']){
         //check if the news has all the required fields
-        if(news['urlToImage']!=null && news["description"]!=null && news['author']!=null) {
+        // if(news['urlToImage']!=null && news["description"]!=null && news['author']!=null) {
           final data = News(//create a news object
 
               webURL: news['url']?? '',
@@ -75,7 +75,7 @@ class NewsService{
               author: news['author']?? '');
               
           newsList.add(data);//add the news to the list
-         }
+        //  }
       }
 
       // Return only the first 'limit' number of articles

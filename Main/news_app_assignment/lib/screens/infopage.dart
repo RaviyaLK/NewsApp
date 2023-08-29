@@ -75,17 +75,13 @@ class InfoPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  FittedBox(
-                    child: Text(                    
-                      author.trim(),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
+                  Text(                    
+                    author.trim(),
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  FittedBox(
-                    child: Text(
-                      date,
-                      style:  Theme.of(context).textTheme.bodySmall,
-                    ),
+                  Text(
+                    date,
+                    style:  Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
