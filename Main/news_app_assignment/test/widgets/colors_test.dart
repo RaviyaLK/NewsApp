@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:news_app_assignment/Constants/colors.dart';
+import 'package:news_app_assignment/widgets/colors.dart';
 
 
 void main() {

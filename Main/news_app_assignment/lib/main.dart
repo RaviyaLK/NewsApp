@@ -21,7 +21,6 @@ class MainApp extends StatelessWidget {
   
     primaryColor: Colors.lightBlue[800],
 
-  
     textTheme: const TextTheme(
       displayLarge: TextStyle(fontSize: 42, fontWeight: FontWeight.bold),
       titleLarge: TextStyle(fontSize: 20, ),

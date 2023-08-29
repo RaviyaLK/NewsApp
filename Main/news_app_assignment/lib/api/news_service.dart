@@ -11,6 +11,7 @@ class NewsService{
 
   //retrieve news from api
   Future <List<News> > getNews(String query, int pageNum,int limit) async{
+  
     
     List <News> newsList = [];
      UrltoAPI urlob = UrltoAPI(query: query, pageNum: pageNum,limit:limit);
@@ -40,8 +41,12 @@ class NewsService{
       
       return newsList; 
     }
-    else{
+    else if(response.statusCode == 429){
+      throw Exception('Too many requests');
       //throw an exception if the server did not return a 200 OK response
+   
+    }
+    else{
       throw Exception('Failed to load news');
     }
   }
@@ -70,17 +75,14 @@ class NewsService{
               author: news['author']?? '');
               
           newsList.add(data);//add the news to the list
-        }
+         }
       }
-      
-      return newsList; 
+
+      // Return only the first 'limit' number of articles
+      return newsList.take(limit).toList();
+    } else {
+      return [];
     }
-    
-   
-    else{
-      //throw an exception if the server did not return a 200 OK response
-  return [];
   }
-}
 
 }

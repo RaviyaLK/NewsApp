@@ -4,5 +4,6 @@
  const String cancel = "Cancel";
  const String buttonName = "Read the Full article";
  const String randomText = "Random";
+ const String noMoreNews= "No more news";
 
   
