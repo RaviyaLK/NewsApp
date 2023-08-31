@@ -34,7 +34,6 @@ int pageNum = 1;
 bool isLoading = false;
 List<News> list = [];
 List<News> loadedNews = [];
-
 int limit = 10;
 bool isAllLoaded = false;
 
@@ -225,146 +224,155 @@ class NewsPage extends ConsumerWidget {
           ),
         ),
       ),
-      body: Consumer(
-        builder: (context, ref, child) {
-          final newsList = ref.watch(asyncNewsProvider);
-
-          searchQuery = ref.watch(searchQueryProvider.notifier).state;
-          if (isSearchBarFocused && searchController.text.isEmpty) {
-            return ListView.separated(
-              reverse: true,
-              separatorBuilder: (context, index) => const Padding(
-                padding: EdgeInsets.only(left: 14.0, right: 14.0),
-                child: Divider(
-                  height: 1,
-                  thickness: 1,
-                ),
-              ),
-              shrinkWrap: true,
-              itemCount: searchHistory.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  hoverColor: Colors.grey[300],
-                  tileColor: Colors.white,
-                  leading: const Icon(Icons.history),
-                  selectedTileColor: Colors.grey[300],
-                  horizontalTitleGap: 4,
-                  onTap: () {
-                    searchController.text = searchHistory[index];
-                    ref.read(searchQueryProvider.notifier).state =
-                        searchController.text;
-                    searchQuery = searchController.text;
-                    ref.read(asyncNewsProvider.notifier)
-                        .getNews(searchHistory[index], pageNum);
-                    ref.read(searchBarFocusedProvider.notifier).state = false;
-                    searchFocusNode.unfocus();
-                  },
-                  title: Text(searchHistory[index],
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                );
-              },
-            );
-          } else {
-            return newsList.when(
-              data: (news) {
-                return Padding(
-                  padding: const EdgeInsets.all(14.0),
-                  child: ListView.separated(
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 20),
-                    shrinkWrap: true,
-                    controller: scrollController,
-                    itemCount: news.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index < news.length) {
-                        return AnimatedOpacity(
-                          duration: const Duration(milliseconds: 500),
-                          opacity: 1,
-                          child: NewsCard(
-                            title: news[index].title,
-                            description: news[index].description,
-                            image: news[index].urltoImage,
-                            date: news[index].date.substring(0, 10),
-                            onpress: () {
-                              Navigator.push(
-                                context,
-                                _createRoute(
-                                  news[index].urltoImage,
-                                  news[index].content,
-                                  news[index].description,
-                                  news[index].title,
-                                  news[index].date.substring(0, 10),
-                                  news[index].author,
-                                  news[index].webURL,
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      } else if (searchQuery.isNotEmpty &&
-                          isAllLoaded == false &&
-                          list.isNotEmpty) {
-                        return const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      } else if (isAllLoaded == true) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                            child: Text(
-                              noMoreNews,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ),
-                        );
-                      } else {
-                        return const SizedBox(height: 20);
-                      }
-                    },
+      body: RefreshIndicator(
+        onRefresh: () {
+          
+          return Future.delayed(const Duration(seconds: 1), () {
+            pageNum=1;
+            ref.read(asyncNewsProvider.notifier).getNews(searchQuery, 1);
+          });
+        },
+        child: Consumer(
+          builder: (context, ref, child) {
+            final newsList = ref.watch(asyncNewsProvider);
+      
+            searchQuery = ref.watch(searchQueryProvider.notifier).state;
+            if (isSearchBarFocused && searchController.text.isEmpty) {
+              return ListView.separated(
+                reverse: true,
+                separatorBuilder: (context, index) => const Padding(
+                  padding: EdgeInsets.only(left: 14.0, right: 14.0),
+                  child: Divider(
+                    height: 1,
+                    thickness: 1,
                   ),
-                );
-              },
-              error: (e, _) {
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "Error: $e",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
+                ),
+                shrinkWrap: true,
+                itemCount: searchHistory.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    hoverColor: Colors.grey[300],
+                    tileColor: Colors.white,
+                    leading: const Icon(Icons.history),
+                    selectedTileColor: Colors.grey[300],
+                    horizontalTitleGap: 4,
+                    onTap: () {
+                      searchController.text = searchHistory[index];
+                      ref.read(searchQueryProvider.notifier).state =
+                          searchController.text;
+                      searchQuery = searchController.text;
+                      ref.read(asyncNewsProvider.notifier)
+                          .getNews(searchHistory[index], pageNum);
+                      ref.read(searchBarFocusedProvider.notifier).state = false;
+                      searchFocusNode.unfocus();
+                    },
+                    title: Text(searchHistory[index],
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                  );
+                },
+              );
+            } else {
+              return newsList.when(
+                data: (news) {
+                  return Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: ListView.separated(
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 20),
+                      shrinkWrap: true,
+                      controller: scrollController,
+                      itemCount: news.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index < news.length) {
+                          return AnimatedOpacity(
+                            duration: const Duration(milliseconds: 500),
+                            opacity: 1,
+                            child: NewsCard(
+                              title: news[index].title,
+                              description: news[index].description,
+                              image: news[index].urltoImage,
+                              date: news[index].date.substring(0, 10),
+                              onpress: () {
+                                Navigator.push(
+                                  context,
+                                  _createRoute(
+                                    news[index].urltoImage,
+                                    news[index].content,
+                                    news[index].description,
+                                    news[index].title,
+                                    news[index].date.substring(0, 10),
+                                    news[index].author,
+                                    news[index].webURL,
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        } else if (searchQuery.isNotEmpty &&
+                            isAllLoaded == false &&
+                            list.isNotEmpty) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        } else if (isAllLoaded == true) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: Text(
+                                noMoreNews,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                          );
+                        } else {
+                          return const SizedBox(height: 20);
+                        }
+                      },
                     ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 0, bottom: 0),
-                        child: Center(
-                          child: Image(
-                            height: screenHeight * 0.5,
-                            width: screenWidth * 0.7,
-                            image:
-                                const AssetImage('lib/assets/ErrorImage.png'),
+                  );
+                },
+                error: (e, _) {
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "Error: $e",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 0, bottom: 0),
+                          child: Center(
+                            child: Image(
+                              height: screenHeight * 0.5,
+                              width: screenWidth * 0.7,
+                              image:
+                                  const AssetImage('lib/assets/ErrorImage.png'),
+                            ),
                           ),
                         ),
                       ),
+                    ],
+                  );
+                },
+                loading: () => Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
+                  child: Center(
+                    child: LoadingAnimationWidget.staggeredDotsWave(
+                      color: Colors.blue,
+                      size: 100,
                     ),
-                  ],
-                );
-              },
-              loading: () => Padding(
-                padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
-                child: Center(
-                  child: LoadingAnimationWidget.staggeredDotsWave(
-                    color: Colors.blue,
-                    size: 100,
                   ),
                 ),
-              ),
-            );
-          }
-        },
+              );
+            }
+          },
+        ),
       ),
     );
   }
