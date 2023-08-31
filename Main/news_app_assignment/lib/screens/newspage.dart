@@ -172,8 +172,12 @@ class NewsPage extends ConsumerWidget {
                         if (value.isNotEmpty &&
                             searchController.text.trim().isNotEmpty) {
                           debouncer.run(() {
+                          
                             ref.read(asyncNewsProvider.notifier)
                                 .getNews(value, pageNum);
+                            ref.read(searchQueryProvider.notifier).state =
+                             searchController.text;
+                            searchQuery = searchController.text;
                           });
                         }
                         if (value.isEmpty) {
