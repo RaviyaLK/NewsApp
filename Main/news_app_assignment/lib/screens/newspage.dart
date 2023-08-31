@@ -83,7 +83,6 @@ class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
           }
         }
         
-        // list.addAll(loadedNews.take(limit)); // Add only once
         pageNum++; // Increment pageNum if not all articles were loaded
       }
 

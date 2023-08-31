@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:news_app_assignment/Constants/string_const.dart';
 
 class CustomSearchBar extends StatelessWidget {
   const CustomSearchBar({
@@ -45,7 +46,7 @@ class CustomSearchBar extends StatelessWidget {
             },
             decoration: const InputDecoration.collapsed(
               hintStyle: TextStyle(color: Colors.grey),
-              hintText: 'Search',
+              hintText: hintText,
             ),
           ),
         ),
