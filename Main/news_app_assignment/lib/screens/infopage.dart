@@ -23,10 +23,19 @@ class InfoPage extends StatelessWidget {
   final String date;
   final String author;
   final String webURL;
+  
+String shorten(){
+   if(author.length >40) {
+   return author.substring(0,40);
+     }else {
+    return author;
+     }   
 
+}
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       backgroundColor: appBackground,//Colors.white,
       appBar: AppBar(
@@ -36,6 +45,7 @@ class InfoPage extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Column(
+          
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 20),
@@ -75,8 +85,9 @@ class InfoPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(                    
-                    author.trim(),
+                  Text(   
+                            
+                    shorten(),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   Text(

@@ -228,7 +228,7 @@ class NewsPage extends ConsumerWidget {
         onRefresh: () {
           
           return Future.delayed(const Duration(seconds: 1), () {
-            pageNum=1;
+            pageNum=1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
             ref.read(asyncNewsProvider.notifier).getNews(searchQuery, 1);
           });
         },
