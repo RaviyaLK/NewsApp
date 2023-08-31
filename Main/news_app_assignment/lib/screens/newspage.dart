@@ -14,6 +14,7 @@ import '../widgets/news_card.dart';
 import 'infopage.dart';
 
 String searchQuery = ''; // search query to pass to the news api
+String previousSearchQuery = '';
 final searchQueryProvider = StateProvider((ref) => searchQuery); // provider for the search query
 TextEditingController searchController = TextEditingController(); // controller for the search bar
 List<String> searchHistory = []; // list of search history
@@ -38,25 +39,22 @@ int limit = 10;
 bool isAllLoaded = false;
 
 class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
-  String previousSearchQuery = '';
+
 
   @override
   FutureOr<List<News>> build() {
     return loadedNews;
   }
 
-  void resetPageNum() {
-    pageNum = 1;
-  }
+
 
   Future<List<News>> getNews(searchQuery, pageNum) async {
     state = const AsyncLoading(); // sets the state to loading
     if (searchQuery != previousSearchQuery) {
       pageNum = 1;
       list.clear();
-      previousSearchQuery = searchQuery;
+     
     }
-
     state = await AsyncValue.guard(() async {
       // sets the state to success
       list = await ref
@@ -70,15 +68,6 @@ class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
   }
 
   Future<List<News>> fetch(int pageNum) async {
-    String search = ref.read(searchQueryProvider.notifier).state;
-    search = searchQuery;
-    if (search != previousSearchQuery) {
-      // Check if the search query has changed
-      list.clear(); // Clear the existing list when a new search is performed
-      isAllLoaded = false; // Reset isAllLoaded
-      pageNum = 1;
-      previousSearchQuery = searchQuery;
-    }
     isLoading = true;
 
     state = await AsyncValue.guard(() async {
@@ -89,6 +78,7 @@ class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
       if (loadedNews.isEmpty) {
         isAllLoaded = true;
       } else {
+        
         list.addAll(loadedNews.take(limit)); // Add only once
         pageNum++; // Increment pageNum if not all articles were loaded
       }
@@ -113,6 +103,12 @@ class NewsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scroller = ref.watch(scrollProvider);
     Debouncer debouncer = Debouncer();
+    if (searchQuery != previousSearchQuery) {
+      list.clear(); // Clear the existing list when a new search is performed
+      isAllLoaded = false; // Reset isAllLoaded
+      pageNum = 1;
+      previousSearchQuery = searchQuery;
+    }
     scroller.addListener(() {
       if (scroller.position.pixels == scroller.position.maxScrollExtent &&
           scroller.position.atEdge) {
@@ -178,6 +174,7 @@ class NewsPage extends ConsumerWidget {
                             ref.read(searchQueryProvider.notifier).state =
                              searchController.text;
                             searchQuery = searchController.text;
+                            searchFocusNode.unfocus();
                           });
                         }
                         if (value.isEmpty) {
