@@ -35,6 +35,9 @@ class CustomSearchBar extends StatelessWidget {
             autocorrect: true,
             controller: searchController,
             focusNode: searchFocusNode,
+            onTapOutside: (event) {
+              searchFocusNode.unfocus();
+            },
             onTap: () async {
               onTap();
             },

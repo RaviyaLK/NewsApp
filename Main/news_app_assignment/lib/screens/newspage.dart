@@ -83,6 +83,7 @@ class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
           }
         }
         
+
         pageNum++; // Increment pageNum if not all articles were loaded
       }
 
@@ -107,7 +108,7 @@ class NewsPage extends ConsumerWidget {
     final scroller = ref.watch(scrollProvider);
     Debouncer debouncer = Debouncer();
     if (searchQuery != previousSearchQuery) {
-      list.clear(); // Clear the existing list when a new search is performed
+     // Clear the existing list when a new search is performed
       isAllLoaded = false; // Reset isAllLoaded
       pageNum = 1;
       previousSearchQuery = searchQuery;
@@ -174,10 +175,10 @@ class NewsPage extends ConsumerWidget {
                           
                             ref.read(asyncNewsProvider.notifier)
                                 .getNews(value, pageNum);
-                            ref.read(searchQueryProvider.notifier).state =
+                            ref.watch(searchQueryProvider.notifier).state =
                              searchController.text;
                             searchQuery = searchController.text;
-                            searchFocusNode.unfocus();
+                            // searchFocusNode.unfocus();
                           });
                         }
                         if (value.isEmpty) {
