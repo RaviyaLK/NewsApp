@@ -77,8 +77,13 @@ class AsyncNewsNotifier extends AsyncNotifier<List<News>> {
       if (loadedNews.isEmpty) {
         isAllLoaded = true;
       } else {
+        for(int i=0;i<loadedNews.length;i++){
+          if(!list.contains(loadedNews[i])){
+            list.add(loadedNews[i]);
+          }
+        }
         
-        list.addAll(loadedNews.take(limit)); // Add only once
+        // list.addAll(loadedNews.take(limit)); // Add only once
         pageNum++; // Increment pageNum if not all articles were loaded
       }
 
