@@ -1,5 +1,5 @@
 # news-app-training
-
+This is a sample flutter news app built using the api of Newsapi.org. 
 
 
 ## Getting started
